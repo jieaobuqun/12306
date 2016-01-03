@@ -15,9 +15,11 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -48,15 +50,13 @@ public class Train {
 					hasTicket = request(num++, url, conf);
 					
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}	
 			}
 		}
-		
-		closeClient();
 	}
 
 	public boolean request(int num, String url, QueryConfig conf) {
@@ -115,6 +115,8 @@ public class Train {
 						 !info.getString(seats[i] + "_num").equals("--")) {
 						System.out.print(
 								"train: " + trainName +
+								" (" + conf.getFromCity().name() + "-" +
+										conf.getToCity().name() + ") " +
 								" ,date: " + info.getString("start_train_date"));
 						System.out.println(", " + seats[i].name() + ": " + 
 								info.getString(seats[i] + "_num"));
@@ -154,6 +156,41 @@ public class Train {
 		}
 
 		return false;
+	}
+	
+	public CloseableHttpResponse getRequest (String url) {
+		httpClient = getClient();
+		if (httpClient == null) return null;
+
+		// Post方法
+		HttpGet httpGet = new HttpGet(url);
+		CloseableHttpResponse response = null;
+		
+		try {
+			response = httpClient.execute(httpGet);
+			System.out.println( "Get request: " + response.getStatusLine() );
+		}  catch (Exception e) {
+		}
+		
+		return response;
+	}
+	
+	public CloseableHttpResponse postRequest (String url, Header []params) {
+		httpClient = getClient();
+		if (httpClient == null) return null;
+
+		// Post方法
+		HttpPost httpPost = new HttpPost(url);
+		httpPost.setHeaders(params);
+		CloseableHttpResponse response = null;
+		
+		try {
+			response = httpClient.execute(httpPost);
+			System.out.println( "Post request: " + response.getStatusLine() );
+		}  catch (Exception e) {
+		}
+		
+		return response;
 	}
 
 	private CloseableHttpClient getClient () {

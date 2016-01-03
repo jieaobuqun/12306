@@ -8,22 +8,19 @@ import java.util.Map;
 
 public class QueryConfig {
 	
-	String []url;
+	private String []url;
 	
-	City fromCity;
+	private City fromCity;
 	
-	City toCity;
+	private City toCity;
 	
-	Map<String, Seat[]> trainSeatsMap;
-	
-	Date []dates;
+	private Map<String, Seat[]> trainSeatsMap;
 	
 	public QueryConfig (City fromCity, City toCity, Map<String, Seat[]> trainSeatsMap,
 			Date[] dates) {
 		this.fromCity = fromCity;
 		this.toCity = toCity;
 		this.trainSeatsMap = trainSeatsMap;
-		this.dates = dates;
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		
