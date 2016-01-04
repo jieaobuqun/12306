@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -40,8 +41,8 @@ public class Action {
 	}
 	
 	/* 模拟登录 */
-	public static void login (Train train) {
-		String loginUrl = "https://kyfw.12306.cn/otn/login/loginAysnSuggest";
+	public static void login () {
+		String loginUrl = Constant.baseUrl + "login/loginAysnSuggest";
 		String username = "jieaobuqun";
 		String password = "";
 		String randCode = "";
@@ -55,7 +56,7 @@ public class Action {
 		CloseableHttpResponse response = null;
 		
 		while (!login) {
-			response = train.postRequest(loginUrl, params);
+			response = Train.postRequest(loginUrl, params);
 			login = response != null && response.getStatusLine().getStatusCode() == 200;
 		}
 		
@@ -65,8 +66,19 @@ public class Action {
 		}
 	}
 	
+	/* 获取图片 */
 	public static File getImage (String url) {
-		File file;
+		File file = new File(Constant.resourcePath + "image.jpg");
+		CloseableHttpResponse response = Train.getRequest(url);
+		
+		try {
+			byte []data = EntityUtils.toByteArray( response.getEntity() );
+			FileUtils.writeByteArrayToFile(file, data);
+			response.close();
+		} catch (Exception e) {
+			System.out.println("Get file error!");
+		}
+		
 		return file;	
 	}
 }

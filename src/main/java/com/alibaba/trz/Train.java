@@ -2,8 +2,6 @@ package com.alibaba.trz;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URLDecoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
@@ -31,10 +29,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class Train {
-
-	private CloseableHttpClient httpClient;
 	
 	private QueryConfig []config;
+	
+	private static CloseableHttpClient httpClient;
 	
 	public Train (QueryConfig []config) {
 		this.config = config;
@@ -48,6 +46,7 @@ public class Train {
 				String []urls = conf.getUrls();
 				for (String url : urls) {
 					hasTicket = request(num++, url, conf);
+					if (hasTicket) return;
 					
 					try {
 						Thread.sleep(2000);
@@ -158,7 +157,7 @@ public class Train {
 		return false;
 	}
 	
-	public CloseableHttpResponse getRequest (String url) {
+	public static CloseableHttpResponse getRequest (String url) {
 		httpClient = getClient();
 		if (httpClient == null) return null;
 
@@ -175,7 +174,7 @@ public class Train {
 		return response;
 	}
 	
-	public CloseableHttpResponse postRequest (String url, Header []params) {
+	public static CloseableHttpResponse postRequest (String url, Header []params) {
 		httpClient = getClient();
 		if (httpClient == null) return null;
 
@@ -193,7 +192,7 @@ public class Train {
 		return response;
 	}
 
-	private CloseableHttpClient getClient () {
+	private static CloseableHttpClient getClient () {
 		if (httpClient != null)
 			return httpClient;
 
@@ -217,7 +216,7 @@ public class Train {
 		return client;
 	}
 
-	public void closeClient () {
+	public static void closeClient () {
 		if (httpClient == null)
 			return;
 
@@ -228,15 +227,8 @@ public class Train {
 		}
 	}
 
-	public void playVideo () {
-		ClassLoader classLoader = getClass().getClassLoader();
-		String path = "";
-		try {
-			path = URLDecoder.decode(new URI(classLoader.getResource("train.wav").
-					toString()).toString(), "UTF-8").substring(6);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public static void playVideo () {
+		String path = Constant.resourcePath + "train.wav";
 		File file = new File(path);
 
 		SourceDataLine auline = null;
