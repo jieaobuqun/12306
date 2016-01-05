@@ -1,10 +1,15 @@
 package com.alibaba.trz;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.Header;
@@ -67,18 +72,31 @@ public class Action {
 	}
 	
 	/* 获取图片 */
-	public static File getImage (String url) {
-		File file = new File(Constant.resourcePath + "image.jpg");
+	public static BufferedImage getImage (String url) {
+		//File file = new File(Constant.resourcePath + "image.jpg");
 		CloseableHttpResponse response = Train.getRequest(url);
+		BufferedImage myImage = null;
 		
 		try {
-			byte []data = EntityUtils.toByteArray( response.getEntity() );
-			FileUtils.writeByteArrayToFile(file, data);
+			//byte []data = EntityUtils.toByteArray( response.getEntity() );
+			myImage = ImageIO.read(response.getEntity().getContent());
+			//FileUtils.writeByteArrayToFile(file, data);
 			response.close();
 		} catch (Exception e) {
 			System.out.println("Get file error!");
 		}
 		
-		return file;	
+		return myImage;	
+	}
+	
+	/*获取图片对象*/
+	public static BufferedImage getImage () {
+		BufferedImage icon = null;
+		try {
+			icon = ImageIO.read(new File(Constant.resourcePath + "icon.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return icon;
 	}
 }

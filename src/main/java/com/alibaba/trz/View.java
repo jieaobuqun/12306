@@ -1,13 +1,20 @@
 package com.alibaba.trz;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,7 +25,7 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	
 	private String url;
 	
-	private BufferedImage image;
+	private ImagePanel image;
 
 	public View(String title, String url) {
 		super(title);
@@ -29,16 +36,13 @@ public class View extends JFrame implements ActionListener, MouseListener {
 
 	public void captcha() {
 		// This is an empty content area in the frame
-		BufferedImage = ImageIO.read(new File(Constant.resourcePath + "image.jpg"));
-		JLabel picLabel = new JLabel(new ImageIcon(myPicture));
-		add(picLabel);
+		image = new ImagePanel(Action.getImage(url));
+		this.add(image);
 
 		this.getContentPane().add(image, BorderLayout.CENTER);
 		
 		JButton button1 = new JButton("刷新");
 		JButton button2 = new JButton("确定");
-		button1.setBounds(0, 200, 150, 20);
-		button2.setBounds(0, 200, 150, 20);
 		
 		JPanel panel = new JPanel();
 		panel.add(button1);
@@ -54,10 +58,11 @@ public class View extends JFrame implements ActionListener, MouseListener {
 
 	public void actionPerformed(ActionEvent e) {
 		if ( e.getActionCommand().equals("刷新") ) {
-			Action.getImage(url);
 			this.getContentPane().remove(image);
-			image = new JLabel(new ImageIcon(Constant.resourcePath + "image.jpg"));	
+			image = new ImagePanel(Action.getImage(url));
+			
 			this.getContentPane().add(image, BorderLayout.CENTER);
+			this.validate();
 			image.addMouseListener(this);
 		} else {
 			
@@ -65,12 +70,12 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		System.out.print(e.getX() + "," + e.getY() + " ");
-		JLabel icon = new JLabel(new ImageIcon(Constant.resourcePath + "icon.png"));
-		icon.setBounds(e.getX(), e.getY(), 26, 26);
-		this.getContentPane().add(icon, BorderLayout.PAGE_START);
-		this.revalidate();
-		this.repaint();
+		int x = e.getX();
+		int y = e.getY();
+		
+		Graphics graph = image.getGraphics();
+		BufferedImage icon = Action.getImage();
+		graph.drawImage(icon, x-13, y-13, null);
 	}
 
 	public void mousePressed(MouseEvent e) {}
@@ -80,4 +85,27 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	public void mouseEntered(MouseEvent e) {}
 
 	public void mouseExited(MouseEvent e) {}
+}
+
+class ImagePanel extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
+	
+	private BufferedImage image;
+	
+    public ImagePanel(BufferedImage image) {
+        this.image = image;
+    }
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(image, 0, 0, this);
+    }
+    
+    @Override
+    public Dimension getPreferredSize() {
+      int width = image.getWidth();
+      int height = image.getHeight();
+      return new Dimension(width , height );
+    }
 }
