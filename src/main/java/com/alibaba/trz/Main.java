@@ -8,8 +8,6 @@ public class Main {
 		
 		train.refreshTickets();
 		Train.closeClient();*/
-		View view = new View("登录", Constant.baseUrl + 
-				"passcodeNew/getPassCodeNew?module=login&rand=sjrand");
-		view.captcha();
+		Action.login();
 	}
 }

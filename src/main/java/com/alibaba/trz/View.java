@@ -3,20 +3,15 @@ package com.alibaba.trz;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class View extends JFrame implements ActionListener, MouseListener {
@@ -25,13 +20,17 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	
 	private String url;
 	
+	private Bean bean;
+	
 	private ImagePanel image;
 
-	public View(String title, String url) {
+	public View(String title, String url, Bean bean) {
 		super(title);
 		this.url = url;
+		this.bean = bean;
 		this.setSize(305, 270);
 		this.setLocationRelativeTo(null);
+		this.setDefaultCloseOperation(View.DISPOSE_ON_CLOSE);
 	}
 
 	public void captcha() {
@@ -65,13 +64,23 @@ public class View extends JFrame implements ActionListener, MouseListener {
 			this.validate();
 			image.addMouseListener(this);
 		} else {
-			
+			synchronized (bean) {
+				bean.notify();
+			}
+			this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 		}
 	}
 
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
+		
+		String randCode = bean.getRandCode();
+		if (randCode == null)
+			randCode = x + "," + y;
+		else
+			randCode += "," + x + "," + y;
+		bean.setRandCode(randCode);
 		
 		Graphics graph = image.getGraphics();
 		BufferedImage icon = Action.getImage();

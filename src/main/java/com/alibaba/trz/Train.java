@@ -55,7 +55,10 @@ public class Train {
 					}
 				}	
 			}
+			hasTicket = P2P.getEdaiStatus();
 		}
+		for (int i = 0; i < 2; ++i)
+			Train.playVideo();
 	}
 
 	public boolean request(int num, String url, QueryConfig conf) {
@@ -167,7 +170,7 @@ public class Train {
 		
 		try {
 			response = httpClient.execute(httpGet);
-			System.out.println( "Get request: " + response.getStatusLine() );
+			//System.out.println( "Get request: " + response.getStatusLine() );
 		}  catch (Exception e) {
 		}
 		
@@ -185,11 +188,20 @@ public class Train {
 		
 		try {
 			response = httpClient.execute(httpPost);
-			System.out.println( "Post request: " + response.getStatusLine() );
+			//System.out.println( "Post request: " + response.getStatusLine() );
 		}  catch (Exception e) {
 		}
 		
 		return response;
+	}
+	
+	public static void closeResponse (CloseableHttpResponse response) {
+		try {
+			if (response != null)
+				response.close();
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
 	}
 
 	private static CloseableHttpClient getClient () {
