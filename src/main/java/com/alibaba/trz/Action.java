@@ -18,42 +18,23 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static QueryConfig[] setConfig () {
-		QueryConfig[] config = new QueryConfig[6];
+		QueryConfig[] config = new QueryConfig[1];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
 		cal.set(2016, 1, 4); // 1 月用0表示, 2表示3月
 		Date[] dates = { cal.getTime() };
-		cal.set(2016, 1, 5);
-		Date[] dates1 = { cal.getTime() };
 		
 		/*设置车次和座位信息*/
-		Seat[] seat = {Seat.硬卧};
-		Seat[] seat1 = {Seat.二等座};
+		Seat[] seat = {Seat.硬卧, Seat.软卧};
 		Map<String, Seat[]> map = new HashMap<String, Seat[]>();
-		map.put("Z257", seat);
-		
-		Map<String, Seat[]> map2 = new HashMap<String, Seat[]>();
-		map2.put("Z47", seat);
-		map2.put("Z257", seat);
-		
-		Map<String, Seat[]> map3 = new HashMap<String, Seat[]>();
-		map3.put("D2207", seat1);
-		map3.put("D3073", seat1);
-		map3.put("D2223", seat1);
-		map3.put("D2213", seat1);
-		
-		Map<String, Seat[]> map4 = new HashMap<String, Seat[]>();
-		map4.put("D3081", seat1);
-        map4.put("D3007", seat1);
+		map.put("Z49", seat);
+		map.put("T9", seat);
+		map.put("Z3", seat);
+		map.put("Z95", seat);
 		
 		/*设置起止车站*/
-		config[0] = new QueryConfig(City.上海, City.重庆, map, dates);
-		config[1] = new QueryConfig(City.杭州, City.重庆, map, dates);
-		config[2] = new QueryConfig(City.杭州, City.宜昌, map, dates);
-		config[3] = new QueryConfig(City.杭州, City.武汉, map2, dates);
-		config[4] = new QueryConfig(City.南京, City.宜昌, map3, dates1);
-		config[5] = new QueryConfig(City.南京, City.宜昌, map4, dates);
+		config[0] = new QueryConfig(City.北京, City.重庆, map, dates);
 		
 		return config;
 	}
