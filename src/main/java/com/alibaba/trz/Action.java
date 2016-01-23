@@ -3,7 +3,6 @@ package com.alibaba.trz;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,7 +10,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -20,7 +18,7 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static QueryConfig[] setConfig () {
-		QueryConfig[] config = new QueryConfig[5];
+		QueryConfig[] config = new QueryConfig[6];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
@@ -45,12 +43,17 @@ public class Action {
 		map3.put("D2223", seat1);
 		map3.put("D2213", seat1);
 		
+		Map<String, Seat[]> map4 = new HashMap<String, Seat[]>();
+		map4.put("D3081", seat1);
+        map4.put("D3007", seat1);
+		
 		/*设置起止车站*/
 		config[0] = new QueryConfig(City.上海, City.重庆, map, dates);
 		config[1] = new QueryConfig(City.杭州, City.重庆, map, dates);
 		config[2] = new QueryConfig(City.杭州, City.宜昌, map, dates);
 		config[3] = new QueryConfig(City.杭州, City.武汉, map2, dates);
 		config[4] = new QueryConfig(City.南京, City.宜昌, map3, dates1);
+		config[5] = new QueryConfig(City.南京, City.宜昌, map4, dates);
 		
 		return config;
 	}

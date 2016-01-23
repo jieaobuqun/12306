@@ -18,7 +18,7 @@ public class P2P {
 			for (Element item : items) {
 				Element li = item.children().last();
 				String status = li.select(".ui-btn").html();
-				if (!status.equals("还款中")) {
+				if (!status.equals("还款中") && !status.equals("已满标")) {
 					System.out.println("易贷有投资啦！");
 					return true;
 				}

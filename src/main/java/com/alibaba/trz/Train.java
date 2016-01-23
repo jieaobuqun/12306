@@ -32,6 +32,8 @@ public class Train {
 	
 	private QueryConfig []config;
 	
+	private int trainIndex = 0;
+	
 	private static CloseableHttpClient httpClient;
 	
 	public Train (QueryConfig []config) {
@@ -39,26 +41,24 @@ public class Train {
 	}
 
 	public void refreshTickets () {
-		int num = 1;
+		int num = 0;
 		boolean hasTicket = false;
 		while (!hasTicket) {
+		    ++num;
 			for (QueryConfig conf : config) {
 				String []urls = conf.getUrls();
 				for (String url : urls) {
-					hasTicket = request(num++, url, conf);
+					hasTicket = request(num, url, conf);
 					if (hasTicket) return;
 					
 					try {
-						Thread.sleep(2000);
+						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}	
 			}
-			hasTicket = P2P.getEdaiStatus();
 		}
-		for (int i = 0; i < 2; ++i)
-			Train.playVideo();
 	}
 
 	public boolean request(int num, String url, QueryConfig conf) {
@@ -72,10 +72,12 @@ public class Train {
 		label: try {
 			response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if ( num % 10 == 0)   
+			if ( conf == config[0] && ( (num + 1) % 50 == 0 || (num % 200 == 0 && trainIndex % 2 == 1) ) ) {
+			    trainIndex = 0;
+			    System.out.println();
+			}
+			if ((num + 2) % 10 == 0)   
 				System.out.print(statusCode + "  ");
-			if (num % 250 == 0)
-				System.out.println();
 			if (statusCode != 200) break label;
 
 			HttpEntity entity = response.getEntity();
@@ -100,15 +102,20 @@ public class Train {
 				trainCount--;
 				trainFound.add(trainName);
 				
-				if (num % 1000 == 0) {		
+				if ((num + 1) % 200 == 0) {		
 					System.out.print(
-							"train: " + trainName +
-							" ,date: " + info.getString("start_train_date"));
+							"train: " + trainName + "\t" +
+							"date: " + info.getString("start_train_date") + "\t" +
+							conf.getFromCity().name() + "-" + conf.getToCity().name() + "  " );
 					
 					for (Seat seat : seats) 
-						System.out.print(", " + seat.name() + ": " + 
-										info.getString(seat + "_num"));
-					System.out.println();
+						System.out.print(seat.name() + ": " + 
+										info.getString(seat + "_num") + "  \t");
+					
+					if (++trainIndex % 2 == 0)
+					    System.out.println();
+					else
+					    System.out.print("\t\t");
 				}
 				
 				boolean hasTicket = false;
@@ -129,7 +136,7 @@ public class Train {
 				
 				if (!hasTicket) continue;
 				
-				for (int i = 0; i < 3; ++i)
+				for (int i = 0; i < 2; ++i)
 					playVideo();
 				return true;
 			
@@ -145,7 +152,7 @@ public class Train {
 				System.out.print(" " + train + " ");
 			System.out.println();
 			
-			return true;
+			return false;
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
