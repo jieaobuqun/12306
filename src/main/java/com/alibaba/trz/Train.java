@@ -68,15 +68,25 @@ public class Train {
 		// Get方法
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse response = null;
+		
+		// 用于输出显示更加规范
+		final int screenSize = 30;
+		// 请求多少次显示一次HTTP状态码
+		final int timesShow = 10;
+		// 请求多少次输出换行，根据以上两个常量来决定
+		final int timesNewLine = screenSize / config.length * timesShow;
+		// 请求多少次输出一次列车信息
+		final int timesTrainInfo = timesNewLine * 4;
 
 		label: try {
 			response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if ( conf == config[0] && ( (num + 1) % 50 == 0 || (num % 200 == 0 && trainIndex % 2 == 1) ) ) {
+			if ( conf == config[0] && ( (num + 1) % timesNewLine == 0 || 
+			                            (num % timesTrainInfo == 0 && trainIndex % 2 == 1) ) ) {
 			    trainIndex = 0;
 			    System.out.println();
 			}
-			if ((num + 2) % 10 == 0)   
+			if ((num + 2) % timesShow == 0)   
 				System.out.print(statusCode + "  ");
 			if (statusCode != 200) break label;
 
@@ -102,15 +112,19 @@ public class Train {
 				trainCount--;
 				trainFound.add(trainName);
 				
-				if ((num + 1) % 200 == 0) {		
+				if ((num + 1) % timesTrainInfo == 0) {		
 					System.out.print(
 							"train: " + trainName + "\t" +
 							"date: " + info.getString("start_train_date") + "\t" +
 							conf.getFromCity().name() + "-" + conf.getToCity().name() + "  " );
 					
-					for (Seat seat : seats) 
+					for (Seat seat : seats)  {
 						System.out.print(seat.name() + ": " + 
-										info.getString(seat + "_num") + "  \t");
+										info.getString(seat + "_num") + " ");
+						
+						if (seat.name().length() == 2)
+						    System.out.print(" ");
+					}
 					
 					if (++trainIndex % 2 == 0)
 					    System.out.println();
