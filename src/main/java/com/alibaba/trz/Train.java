@@ -97,7 +97,7 @@ public class Train {
 			// parsing JSON
 			JSONObject result = JSONObject.parseObject(body);
 			JSONArray trains = result.getJSONArray("data");
-			if (trains == null) break label;
+			if (trains == null || trains.isEmpty()) break label;
 
 			int trainCount = conf.getTrainCount();
 			List<String> trainFound = new LinkedList<String>();
@@ -160,7 +160,7 @@ public class Train {
 			
 			// 有找不到的列车信息，可能写错了
 			List<String> missingTrain = conf.getAbesentTrain(trainFound);
-			System.out.print("\n找不到以下列车信息（" + conf.getFromCity().name()
+			System.out.print("找不到以下列车信息（" + conf.getFromCity().name()
 							+  "--" + conf.getToCity().name() + "）：");
 			for (String train : missingTrain)
 				System.out.print(" " + train + " ");

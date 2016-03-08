@@ -22,16 +22,16 @@ public class Action {
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
-		cal.set(2016, 1, 14); // 1 月用0表示, 2表示3月
+		cal.set(2016, 2, 11); // 1 月用0表示, 2表示3月
 		Date[] dates = { cal.getTime() };
 		
 		/*设置车次和座位信息*/
-		Seat[] seat = {Seat.硬卧};
+		Seat[] seat = {Seat.二等座};
 		Map<String, Seat[]> map = new HashMap<String, Seat[]>();
-		map.put("Z50", seat);
+		map.put("G1504", seat);
 		
 		/*设置起止车站*/
-		config[0] = new QueryConfig(City.重庆, City.北京, map, dates);
+		config[0] = new QueryConfig(City.杭州, City.南京, map, dates);
 		
 		return config;
 	}

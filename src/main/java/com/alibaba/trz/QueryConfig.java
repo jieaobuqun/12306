@@ -25,7 +25,7 @@ public class QueryConfig {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		
 		url = new String[dates.length];
-		String baseUrl = "https://kyfw.12306.cn/otn/leftTicket/queryT";
+		String baseUrl = "https://kyfw.12306.cn/otn/leftTicket/query";
 		String dateParam = "leftTicketDTO.train_date";
 		String fromCityParam = "leftTicketDTO.from_station";
 		String toCityParam = "leftTicketDTO.to_station";
