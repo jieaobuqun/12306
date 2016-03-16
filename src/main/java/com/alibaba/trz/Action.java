@@ -28,9 +28,7 @@ public class Action {
 		/*设置车次和座位信息*/
 		Seat[] seat = {Seat.二等座};
 		Map<String, Seat[]> map = new HashMap<String, Seat[]>();
-		map.put("D3027", seat);
 		map.put("D3007", seat);
-		map.put("D3095", seat);
 		
 		/*设置起止车站*/
 		config[0] = new QueryConfig(City.南京, City.武汉, map, dates);
