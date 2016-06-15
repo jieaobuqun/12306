@@ -70,7 +70,7 @@ public class Train {
 		CloseableHttpResponse response = null;
 		
 		// 用于输出显示更加规范
-		final int screenSize = 30;
+		final int screenSize = 28;
 		// 请求多少次显示一次HTTP状态码
 		final int timesShow = 10;
 		// 请求多少次输出换行，根据以上两个常量来决定
@@ -137,7 +137,7 @@ public class Train {
 					if ( !info.getString(seats[i] + "_num").equals("无") && 
 						 !info.getString(seats[i] + "_num").equals("--")) {
 						System.out.print(
-								"train: " + trainName +
+								"\n" + "train: " + trainName +
 								" (" + conf.getFromCity().name() + "-" +
 										conf.getToCity().name() + ") " +
 								" ,date: " + info.getString("start_train_date"));

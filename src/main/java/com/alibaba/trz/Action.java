@@ -18,27 +18,20 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static QueryConfig[] setConfig () {
-		QueryConfig[] config = new QueryConfig[2];
+		QueryConfig[] config = new QueryConfig[1];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
-		cal.set(2016, 3, 1); // 1 月用0表示, 2表示3月
+		cal.set(2016, 6, 3); // 1 月用0表示, 2表示3月
 		Date[] dates = { cal.getTime() };
 		
 		/*设置车次和座位信息*/
 		Seat[] seat = {Seat.二等座};
-		Map<String, Seat[]> map1 = new HashMap<String, Seat[]>();
-		map1.put("D3011", seat);
-		map1.put("D3033", seat);
-		
-		Map<String, Seat[]> map2 = new HashMap<String, Seat[]>();
-		map2.put("G7692", seat);
-		map2.put("G40", seat);
-		map2.put("G166", seat);
+		Map<String, Seat[]> map = new HashMap<String, Seat[]>();
+		map.put("Z258", seat);
 		
 		/*设置起止车站*/
-		config[0] = new QueryConfig(City.南京, City.武汉, map1, dates);
-		config[1] = new QueryConfig(City.杭州, City.南京, map2, dates);
+		config[0] = new QueryConfig(City.宜昌, City.杭州, map, dates);
 		
 		return config;
 	}
