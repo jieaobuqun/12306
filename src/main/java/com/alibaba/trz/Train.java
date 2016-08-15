@@ -30,13 +30,13 @@ import com.alibaba.fastjson.JSONObject;
 
 public class Train {
 	
-	private QueryConfig []config;
+	private Config []config;
 	
 	private int trainIndex = 0;
 	
 	private static CloseableHttpClient httpClient;
 	
-	public Train (QueryConfig []config) {
+	public Train (Config []config) {
 		this.config = config;
 	}
 
@@ -45,7 +45,7 @@ public class Train {
 		boolean hasTicket = false;
 		while (!hasTicket) {
 		    ++num;
-			for (QueryConfig conf : config) {
+			for (Config conf : config) {
 				String []urls = conf.getUrls();
 				for (String url : urls) {
 					hasTicket = request(num, url, conf);
@@ -61,7 +61,7 @@ public class Train {
 		}
 	}
 
-	public boolean request(int num, String url, QueryConfig conf) {
+	public boolean request(int num, String url, Config conf) {
 		httpClient = getClient();
 		if (httpClient == null) return true;
 
@@ -150,7 +150,7 @@ public class Train {
 				
 				if (!hasTicket) continue;
 				
-				for (int i = 0; i < 2; ++i)
+				for (int i = 0; i < 4; ++i)
 					playVideo();
 				return true;
 			

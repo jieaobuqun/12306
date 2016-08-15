@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class QueryConfig {
+public class Config {
 	
 	private String []url;
 	
@@ -16,7 +16,7 @@ public class QueryConfig {
 	
 	private Map<String, Seat[]> trainSeatsMap;
 	
-	public QueryConfig (City fromCity, City toCity, Map<String, Seat[]> trainSeatsMap,
+	public Config (City fromCity, City toCity, Map<String, Seat[]> trainSeatsMap,
 			Date[] dates) {
 		this.fromCity = fromCity;
 		this.toCity = toCity;
