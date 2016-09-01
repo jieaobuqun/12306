@@ -18,23 +18,27 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static Config[] setConfig () {
-		Config[] config = new Config[4];
+		Config[] config = new Config[6];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
 		Date[] toDates = new Date[1];
+		Date[] toDates2 = new Date[1];
 		Date[] backDates = new Date[1];
+		Date[] backDates2 = new Date[1];
 		
 		/*去程*/
 		cal.set(2016, 8, 30); // 1 月用0表示, 2表示3月		
-		toDates[0] = cal.getTime();
+		toDates[0] = toDates2[0] = cal.getTime();
 		
 		/*返回*/
 		cal.set(2016, 9, 7);
-		backDates[0] = cal.getTime();
+		backDates[0] = backDates2[0] = cal.getTime();
+		
 		
 		/*设置车次和座位信息*/
 		Seat[] seat = {Seat.硬卧};
+		
 		Map<String, Seat[]> toTrains = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> toTrains2 = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> backTrains = new HashMap<String, Seat[]>();
@@ -48,13 +52,13 @@ public class Action {
 		backTrains2.put("Z45", seat);
 		backTrains2.put("Z255", seat);
 		
-		
-		
 		/*设置起止车站*/
 		config[0] = new Config(City.杭州, City.宜昌, toTrains, toDates);
 		config[1] = new Config(City.宜昌, City.杭州, backTrains, backDates);
-		config[2] = new Config(City.杭州, City.武汉, toTrains2, toDates);
-		config[3] = new Config(City.武汉, City.杭州, backTrains2, backDates);
+		config[2] = new Config(City.杭州, City.武汉, toTrains2, toDates2);
+		config[3] = new Config(City.武汉, City.杭州, backTrains2, backDates2);
+		config[4] = new Config(City.上海, City.宜昌, toTrains, toDates);
+		config[5] = new Config(City.宜昌, City.上海, backTrains, backDates);
 		
 		
 		return config;

@@ -70,7 +70,7 @@ public class Train {
 		CloseableHttpResponse response = null;
 		
 		// 用于输出显示更加规范
-		final int screenSize = 28;
+		final int screenSize = 30;
 		// 请求多少次显示一次HTTP状态码
 		final int timesShow = 10;
 		// 总共多少url
@@ -154,7 +154,7 @@ public class Train {
 				
 				if (!hasTicket) continue;
 				
-				for (int i = 0; i < 4; ++i)
+				for (int i = 0; i < 2; ++i)
 					playVideo();
 				return true;
 			
