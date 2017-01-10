@@ -18,38 +18,75 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static Config[] setConfig () {
-		Config[] config = new Config[2];
+		Config[] config = new Config[5];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
-		Date[] toDates = new Date[2];
-		Date[] backDates = new Date[3];
+		Date[] toDates = new Date[1];
+		Date[] backDates = new Date[2];
+		Date[] backDates1 = new Date[1];
 		
 		/*去程*/
-		cal.set(2016, 8, 30); // 1 月用0表示, 2表示3月		
+		cal.set(2017, 0, 22); // 1 月用0表示, 2表示3月		
 		toDates[0] = cal.getTime();
-		cal.set(2016, 8, 29);
-		toDates[1] = cal.getTime();
 		
 		/*返回*/
-		cal.set(2016, 9, 7);
+		cal.set(2017, 1, 3);
+		backDates1[0] = cal.getTime();
+		cal.set(2017, 1, 5);
 		backDates[0] = cal.getTime();
-		cal.set(2016, 9, 8);
+		cal.set(2017, 1, 6);
 		backDates[1] = cal.getTime();
-		cal.set(2016, 9, 9);
-		backDates[2] = cal.getTime();	
 		
 		/*设置车次和座位信息*/
 		Seat[] seat = {Seat.硬卧};
+		Seat[] seat1 = {Seat.二等座};
 		Map<String, Seat[]> toTrains = new HashMap<String, Seat[]>();
-		Map<String, Seat[]> backTrains = new HashMap<String, Seat[]>();
+		Map<String, Seat[]> backTrain = new HashMap<String, Seat[]>();
+		Map<String, Seat[]> backTrain1 = new HashMap<String, Seat[]>();
+		Map<String, Seat[]> backTrain2 = new HashMap<String, Seat[]>();
 		
 		toTrains.put("Z257", seat);
-		backTrains.put("Z258", seat);
+		
+		backTrain.put("Z25", seat);
+		backTrain.put("Z255", seat);
+		
+		backTrain2.put("Z258", seat);
+		
+		backTrain1.put("G310", seat1);
+		backTrain1.put("D2272", seat1);	
+		backTrain1.put("D2218", seat1);	
+		backTrain1.put("D2248", seat1);
+		backTrain1.put("D2228", seat1);
+		backTrain1.put("D2244", seat1);
+		backTrain1.put("D2202", seat1);
+		backTrain1.put("D638", seat1);
+		backTrain1.put("G308", seat1);
+		backTrain1.put("D2224", seat1);
+		backTrain1.put("G1318", seat1);
+		backTrain1.put("D354", seat1);
+		backTrain1.put("D2208", seat1);
+		backTrain1.put("D2256", seat1);
+		backTrain1.put("D2264", seat1);
+		backTrain1.put("D2238", seat1);
+		backTrain1.put("G314", seat1);
+		backTrain1.put("D2374", seat1);
+		backTrain1.put("Z96", seat1);
+		backTrain1.put("D2260", seat1);
+		backTrain1.put("D368", seat1);
+		backTrain1.put("D2278", seat1);
+		backTrain1.put("Z258", seat1);
+		backTrain1.put("Z50", seat1);
+		backTrain1.put("Z4", seat1);
+		backTrain1.put("D2252", seat1);
+		backTrain1.put("K504", seat1);
 		
 		/*设置起止车站*/
 		config[0] = new Config(City.杭州, City.宜昌, toTrains, toDates);
-		config[1] = new Config(City.宜昌, City.杭州, backTrains, backDates);
+		config[1] = new Config(City.武汉, City.杭州, backTrain, backDates);
+		config[2] = new Config(City.宜昌, City.杭州, backTrain2, backDates);
+		config[3] = new Config(City.重庆, City.宜昌, backTrain1, backDates1);
+		config[4] = new Config(City.重庆, City.武汉, backTrain1, backDates1);
 		
 		return config;
 	}
