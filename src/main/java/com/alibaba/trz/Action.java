@@ -80,7 +80,7 @@ public class Action {
 		backTrain1.put("Z4", seat1);
 		backTrain1.put("D2252", seat1);
 		backTrain1.put("K504", seat1);
-		
+
 		/*设置起止车站*/
 		config[0] = new Config(City.杭州, City.宜昌, toTrains, toDates);
 		config[1] = new Config(City.武汉, City.杭州, backTrain, backDates);

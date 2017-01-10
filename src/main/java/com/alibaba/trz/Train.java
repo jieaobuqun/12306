@@ -70,19 +70,23 @@ public class Train {
 		CloseableHttpResponse response = null;
 		
 		// 用于输出显示更加规范
-		final int screenSize = 28;
+		final int screenSize = 30;
 		// 请求多少次显示一次HTTP状态码
 		final int timesShow = 10;
+		// 总共多少url
+		int totalUrls = 0;
+		for (Config con : config) {
+		    totalUrls += con.getUrls().length;
+		}
 		// 请求多少次输出换行，根据以上两个常量来决定
-		final int timesNewLine = screenSize / config.length * timesShow;
+		final int timesNewLine = screenSize / totalUrls * timesShow;
 		// 请求多少次输出一次列车信息
 		final int timesTrainInfo = timesNewLine * 4;
 
 		label: try {
 			response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if ( conf == config[0] && ( (num + 1) % timesNewLine == 0 || 
-			                            (num % timesTrainInfo == 0 && trainIndex % 2 == 1) ) ) {
+			if (config[0].getUrls()[0] == url && ( (num + 1) % timesNewLine == 0 || (num % timesTrainInfo == 0 && trainIndex % 2 == 1) ) ) {
 			    trainIndex = 0;
 			    System.out.println();
 			}
@@ -150,7 +154,7 @@ public class Train {
 				
 				if (!hasTicket) continue;
 				
-				for (int i = 0; i < 4; ++i)
+				for (int i = 0; i < 2; ++i)
 					playVideo();
 				return true;
 			
