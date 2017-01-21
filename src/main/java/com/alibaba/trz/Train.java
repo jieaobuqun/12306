@@ -44,7 +44,6 @@ public class Train {
 		int num = 0;
 		boolean hasTicket = false;
 		while (!hasTicket) {
-		    ++num;
 			for (Config conf : config) {
 				String []urls = conf.getUrls();
 				for (String url : urls) {
@@ -58,6 +57,7 @@ public class Train {
 					}
 				}	
 			}
+            ++num;
 		}
 	}
 
@@ -70,9 +70,9 @@ public class Train {
 		CloseableHttpResponse response = null;
 		
 		// 用于输出显示更加规范
-		final int screenSize = 30;
+		final int screenSize = 34;
 		// 请求多少次显示一次HTTP状态码
-		final int timesShow = 10;
+		final int timesShow = 1;
 		// 总共多少url
 		int totalUrls = 0;
 		for (Config con : config) {
@@ -81,16 +81,17 @@ public class Train {
 		// 请求多少次输出换行，根据以上两个常量来决定
 		final int timesNewLine = screenSize / totalUrls * timesShow;
 		// 请求多少次输出一次列车信息
-		final int timesTrainInfo = timesNewLine * 4;
+		final int timesTrainInfo = timesNewLine * 5;
 
 		label: try {
 			response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if (config[0].getUrls()[0] == url && ( (num + 1) % timesNewLine == 0 || (num % timesTrainInfo == 0 && trainIndex % 2 == 1) ) ) {
+			if (config[0].getUrls()[0] == url && (num > 0 && num % timesNewLine == 0) ||
+                                                 (num > 1 && num % timesTrainInfo == 1 && trainIndex % 2 == 1) ) {
 			    trainIndex = 0;
 			    System.out.println();
 			}
-			if ((num + 2) % timesShow == 0)   
+			if (num % timesTrainInfo != 0 && num % timesShow == 0)
 				System.out.print(statusCode + "  ");
 			if (statusCode != 200) break label;
 
@@ -116,37 +117,29 @@ public class Train {
 				trainCount--;
 				trainFound.add(trainName);
 				
-				if ((num + 1) % timesTrainInfo == 0) {		
-					System.out.print(
-							"train: " + trainName + "\t" +
-							"date: " + info.getString("start_train_date") + "\t" +
-							conf.getFromCity().name() + "-" + conf.getToCity().name() + "  " );
+				if (num > 0 && num % timesTrainInfo == 0) {
+					System.out.format("train: %-5s    ", trainName);
+					System.out.print("date: " + info.getString("start_train_date") + "  ");
+					System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
 					
 					for (Seat seat : seats)  {
-						System.out.print(seat.name() + ": " + 
-										info.getString(seat + "_num") + " ");
-						
-						if (seat.name().length() == 2)
-						    System.out.print(" ");
+						System.out.format("  %3s:%-2s", seat.name(), info.getString(seat + "_num"));
 					}
 					
 					if (++trainIndex % 2 == 0)
 					    System.out.println();
 					else
-					    System.out.print("\t\t");
+					    System.out.print("\t\t\t");
 				}
 				
 				boolean hasTicket = false;
 				for (int i = 0; !hasTicket && i < seats.length; ++i){
 					if ( !info.getString(seats[i] + "_num").equals("无") && 
 						 !info.getString(seats[i] + "_num").equals("--")) {
-						System.out.print(
-								"\n" + "train: " + trainName +
-								" (" + conf.getFromCity().name() + "-" +
-										conf.getToCity().name() + ") " +
-								" ,date: " + info.getString("start_train_date"));
-						System.out.println(", " + seats[i].name() + ": " + 
-								info.getString(seats[i] + "_num"));
+                        System.out.format("train: %5s    ", trainName);
+                        System.out.print("date: " + info.getString("start_train_date") + "  ");
+                        System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
+						System.out.format("  %3s:%2s", seats[i].name(), info.getString(seats[i] + "_num"));
 						hasTicket = true;
 						break;
 					}	

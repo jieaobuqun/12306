@@ -18,7 +18,7 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static Config[] setConfig () {
-		Config[] config = new Config[5];
+		Config[] config = new Config[4];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
@@ -48,7 +48,7 @@ public class Action {
 		
 		toTrains.put("Z257", seat);
 		
-		backTrain.put("Z25", seat);
+		backTrain.put("Z45", seat);
 		backTrain.put("Z255", seat);
 		
 		backTrain2.put("Z258", seat);
@@ -79,14 +79,13 @@ public class Action {
 		backTrain1.put("Z50", seat1);
 		backTrain1.put("Z4", seat1);
 		backTrain1.put("D2252", seat1);
-		backTrain1.put("K504", seat1);
 
 		/*设置起止车站*/
 		config[0] = new Config(City.杭州, City.宜昌, toTrains, toDates);
 		config[1] = new Config(City.武汉, City.杭州, backTrain, backDates);
 		config[2] = new Config(City.宜昌, City.杭州, backTrain2, backDates);
 		config[3] = new Config(City.重庆, City.宜昌, backTrain1, backDates1);
-		config[4] = new Config(City.重庆, City.武汉, backTrain1, backDates1);
+		//config[4] = new Config(City.重庆, City.武汉, backTrain1, backDates1);
 		
 		return config;
 	}
