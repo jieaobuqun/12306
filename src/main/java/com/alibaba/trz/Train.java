@@ -69,7 +69,7 @@ public class Train {
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse response = null;
 		
-		// 用于输出显示更加规范
+		// 屏幕能打印多少个状态码
 		final int screenSize = 34;
 		// 请求多少次显示一次HTTP状态码
 		final int timesShow = 1;
@@ -258,8 +258,8 @@ public class Train {
 	}
 
 	public static void playVideo () {
-		String path = Constant.resourcePath + "train.wav";
-		File file = new File(path);
+		ClassLoader classLoader = Train.class.getClassLoader();
+		File file = new File(classLoader.getResource("train.wav").getFile());
 
 		SourceDataLine auline = null;
 		AudioInputStream audioInputStream = null;

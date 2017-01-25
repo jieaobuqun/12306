@@ -18,12 +18,12 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static Config[] setConfig () {
-		Config[] config = new Config[4];
+		Config[] config = new Config[3];
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
 		Date[] toDates = new Date[1];
-		Date[] backDates = new Date[2];
+		Date[] backDates = new Date[1];
 		Date[] backDates1 = new Date[1];
 		
 		/*去程*/
@@ -33,29 +33,22 @@ public class Action {
 		/*返回*/
 		cal.set(2017, 1, 3);
 		backDates1[0] = cal.getTime();
-		cal.set(2017, 1, 5);
-		backDates[0] = cal.getTime();
 		cal.set(2017, 1, 6);
-		backDates[1] = cal.getTime();
+		backDates[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
 		Seat[] seat = {Seat.硬卧};
 		Seat[] seat1 = {Seat.二等座};
 		Map<String, Seat[]> toTrains = new HashMap<String, Seat[]>();
-		Map<String, Seat[]> backTrain = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> backTrain1 = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> backTrain2 = new HashMap<String, Seat[]>();
-		
+		Map<String, Seat[]> backTrain3 = new HashMap<String, Seat[]>();
+
 		toTrains.put("Z257", seat);
-		
-		backTrain.put("Z45", seat);
-		backTrain.put("Z255", seat);
-		
-		backTrain2.put("Z258", seat);
-		
+
 		backTrain1.put("G310", seat1);
-		backTrain1.put("D2272", seat1);	
-		backTrain1.put("D2218", seat1);	
+		backTrain1.put("D2272", seat1);
+		backTrain1.put("D2218", seat1);
 		backTrain1.put("D2248", seat1);
 		backTrain1.put("D2228", seat1);
 		backTrain1.put("D2244", seat1);
@@ -80,13 +73,20 @@ public class Action {
 		backTrain1.put("Z4", seat1);
 		backTrain1.put("D2252", seat1);
 
-		/*设置起止车站*/
-		config[0] = new Config(City.杭州, City.宜昌, toTrains, toDates);
-		config[1] = new Config(City.武汉, City.杭州, backTrain, backDates);
-		config[2] = new Config(City.宜昌, City.杭州, backTrain2, backDates);
-		config[3] = new Config(City.重庆, City.宜昌, backTrain1, backDates1);
-		//config[4] = new Config(City.重庆, City.武汉, backTrain1, backDates1);
+		backTrain2.put("Z45", seat);
+		backTrain2.put("Z255", seat);
 		
+		backTrain3.put("Z258", seat);
+		backTrain3.put("D658", seat1);
+		backTrain3.put("D2248", seat1);
+		backTrain3.put("D2224", seat1);
+		backTrain3.put("D2264", seat1);
+
+		/*设置起止车站*/
+		config[0] = new Config(City.重庆, City.宜昌, backTrain1, backDates1);
+		config[1] = new Config(City.武汉, City.杭州, backTrain2, backDates);
+		config[2] = new Config(City.宜昌, City.杭州, backTrain3, backDates);
+
 		return config;
 	}
 	
@@ -122,7 +122,7 @@ public class Action {
 		/*请求登录*/
 		String loginUrl = Constant.baseUrl + "login/loginAysnSuggest";
 		String username = "jieaobuqun";
-		String password = "tian7124";
+		String password = "";
 		String randCode = bean.getRandCode();
 		System.out.println(randCode);
 		
@@ -180,8 +180,10 @@ public class Action {
 	/*获取图片对象*/
 	public static BufferedImage getImage () {
 		BufferedImage icon = null;
+		ClassLoader classLoader = Train.class.getClassLoader();
+
 		try {
-			icon = ImageIO.read(new File(Constant.resourcePath + "icon.png"));
+			icon = ImageIO.read(new File(classLoader.getResource("icon.png").getFile()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
