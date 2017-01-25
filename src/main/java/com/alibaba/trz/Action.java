@@ -3,6 +3,7 @@ package com.alibaba.trz;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ import org.apache.http.util.EntityUtils;
 public class Action {
 	/* 设置配置信息 */
 	public static Config[] setConfig () {
-		Config[] config = new Config[3];
+		ArrayList<Config> config = new ArrayList<>();
 		
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
@@ -40,11 +41,14 @@ public class Action {
 		Seat[] seat = {Seat.硬卧};
 		Seat[] seat1 = {Seat.二等座};
 		Map<String, Seat[]> toTrains = new HashMap<String, Seat[]>();
+        Map<String, Seat[]> backTrain = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> backTrain1 = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> backTrain2 = new HashMap<String, Seat[]>();
 		Map<String, Seat[]> backTrain3 = new HashMap<String, Seat[]>();
 
 		toTrains.put("Z257", seat);
+
+        backTrain.put("G8505", seat1);
 
 		backTrain1.put("G310", seat1);
 		backTrain1.put("D2272", seat1);
@@ -77,17 +81,15 @@ public class Action {
 		backTrain2.put("Z255", seat);
 		
 		backTrain3.put("Z258", seat);
-		backTrain3.put("D658", seat1);
-		backTrain3.put("D2248", seat1);
-		backTrain3.put("D2224", seat1);
 		backTrain3.put("D2264", seat1);
 
 		/*设置起止车站*/
-		config[0] = new Config(City.重庆, City.宜昌, backTrain1, backDates1);
-		config[1] = new Config(City.武汉, City.杭州, backTrain2, backDates);
-		config[2] = new Config(City.宜昌, City.杭州, backTrain3, backDates);
+        config.add( new Config(City.荣昌, City.重庆, backTrain, backDates1) );
+        config.add( new Config(City.重庆, City.宜昌, backTrain1, backDates1) );
+        config.add( new Config(City.武汉, City.杭州, backTrain2, backDates) );
+        config.add( new Config(City.宜昌, City.杭州, backTrain3, backDates) );
 
-		return config;
+		return config.toArray(new Config[0]);
 	}
 	
 	/* 模拟登录 */

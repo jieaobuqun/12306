@@ -43,11 +43,13 @@ public class Train {
 	public void refreshTickets () {
 		int num = 0;
 		boolean hasTicket = false;
+        StringBuilder buffer = new StringBuilder();
+
 		while (!hasTicket) {
 			for (Config conf : config) {
 				String []urls = conf.getUrls();
 				for (String url : urls) {
-					hasTicket = request(num, url, conf);
+					hasTicket = request(num, url, conf, buffer);
 					if (hasTicket) return;
 					
 					try {
@@ -61,7 +63,7 @@ public class Train {
 		}
 	}
 
-	public boolean request(int num, String url, Config conf) {
+	public boolean request(int num, String url, Config conf, StringBuilder buffer) {
 		httpClient = getClient();
 		if (httpClient == null) return true;
 
@@ -73,6 +75,9 @@ public class Train {
 		final int screenSize = 34;
 		// 请求多少次显示一次HTTP状态码
 		final int timesShow = 1;
+        // 多少行状态码之后打印列车信息
+        final int lineNum = 5;
+
 		// 总共多少url
 		int totalUrls = 0;
 		for (Config con : config) {
@@ -81,18 +86,27 @@ public class Train {
 		// 请求多少次输出换行，根据以上两个常量来决定
 		final int timesNewLine = screenSize / totalUrls * timesShow;
 		// 请求多少次输出一次列车信息
-		final int timesTrainInfo = timesNewLine * 5;
+		final int timesTrainInfo = timesNewLine * lineNum;
 
 		label: try {
 			response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if (config[0].getUrls()[0] == url && (num > 0 && num % timesNewLine == 0) ||
-                                                 (num > 1 && num % timesTrainInfo == 1 && trainIndex % 2 == 1) ) {
+			if (config[0].getUrls()[0] == url && ((num > 0 && num % timesNewLine == 0) ||
+                                                  (num > 1 && num % timesTrainInfo == 1 && trainIndex % 2 == 1)) ) {
 			    trainIndex = 0;
 			    System.out.println();
 			}
-			if (num % timesTrainInfo != 0 && num % timesShow == 0)
-				System.out.print(statusCode + "  ");
+
+			if (num > 1 && num % timesTrainInfo == 1) {
+                System.out.print(buffer.toString());
+                buffer.setLength(0);
+            }
+
+			if ((num == 0 || num % timesTrainInfo != 0) && num % timesShow == 0) {
+                System.out.print(statusCode + "  ");
+            } else {
+                buffer.append(statusCode + "  ");
+            }
 			if (statusCode != 200) break label;
 
 			HttpEntity entity = response.getEntity();
@@ -119,7 +133,7 @@ public class Train {
 				
 				if (num > 0 && num % timesTrainInfo == 0) {
 					System.out.format("train: %-5s    ", trainName);
-					System.out.print("date: " + info.getString("start_train_date") + "  ");
+					System.out.print("date: " + getDateString(info.getString("start_train_date")) + "  ");
 					System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
 					
 					for (Seat seat : seats)  {
@@ -137,7 +151,7 @@ public class Train {
 					if ( !info.getString(seats[i] + "_num").equals("无") && 
 						 !info.getString(seats[i] + "_num").equals("--")) {
                         System.out.format("train: %5s    ", trainName);
-                        System.out.print("date: " + info.getString("start_train_date") + "  ");
+                        System.out.print("date: " + getDateString(info.getString("start_train_date")) + "  ");
                         System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
 						System.out.format("  %3s:%2s", seats[i].name(), info.getString(seats[i] + "_num"));
 						hasTicket = true;
@@ -147,8 +161,9 @@ public class Train {
 				
 				if (!hasTicket) continue;
 				
-				for (int i = 0; i < 2; ++i)
-					playVideo();
+				for (int i = 0; i < 2; ++i) {
+                    playVideo();
+                }
 				return true;
 			
 			}
@@ -177,6 +192,33 @@ public class Train {
 
 		return false;
 	}
+
+	private String getDateString(String date) {
+        StringBuilder builder = new StringBuilder();
+
+        char[] array = date.toCharArray();
+
+        int i = 0;
+        for (i = 0; i < 4; ++i) {
+            builder.append(array[i]);
+        }
+        builder.append('-');
+
+        for (; i < 6; ++i) {
+            if (array[i] != '0') {
+                builder.append(array[i]);
+            }
+        }
+        builder.append('-');
+
+        for (; i < 8; ++i) {
+            if (array[i] != '0') {
+                builder.append(array[i]);
+            }
+        }
+
+        return builder.toString();
+    }
 	
 	public static CloseableHttpResponse getRequest (String url) {
 		httpClient = getClient();
