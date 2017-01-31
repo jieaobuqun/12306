@@ -149,7 +149,8 @@ public class Train {
 				boolean hasTicket = false;
 				for (int i = 0; !hasTicket && i < seats.length; ++i){
 					if ( !info.getString(seats[i] + "_num").equals("无") && 
-						 !info.getString(seats[i] + "_num").equals("--")) {
+						 !info.getString(seats[i] + "_num").equals("--") &&
+						 !info.getString(seats[i] + "_num").equals("*")) {
                         System.out.format("train: %5s    ", trainName);
                         System.out.print("date: " + getDateString(info.getString("start_train_date")) + "  ");
                         System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
