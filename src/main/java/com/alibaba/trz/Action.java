@@ -25,16 +25,13 @@ public class Action {
 		Calendar cal = Calendar.getInstance();
 		Date[] toDates = new Date[1];
 		Date[] backDates = new Date[1];
-		Date[] backDates1 = new Date[1];
 		
 		/*去程*/
 		cal.set(2017, 0, 22); // 1 月用0表示, 2表示3月		
 		toDates[0] = cal.getTime();
 		
 		/*返回*/
-		cal.set(2017, 1, 3);
-		backDates1[0] = cal.getTime();
-		cal.set(2017, 1, 6);
+		cal.set(2017, 2, 10);
 		backDates[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
@@ -42,52 +39,13 @@ public class Action {
 		Seat[] seat1 = {Seat.二等座};
 		Map<String, Seat[]> toTrains = new HashMap<String, Seat[]>();
         Map<String, Seat[]> backTrain = new HashMap<String, Seat[]>();
-		Map<String, Seat[]> backTrain1 = new HashMap<String, Seat[]>();
-		Map<String, Seat[]> backTrain2 = new HashMap<String, Seat[]>();
-		Map<String, Seat[]> backTrain3 = new HashMap<String, Seat[]>();
 
 		toTrains.put("Z257", seat);
 
-        backTrain.put("G8505", seat1);
-
-		backTrain1.put("G310", seat1);
-		backTrain1.put("D2272", seat1);
-		backTrain1.put("D2218", seat1);
-		backTrain1.put("D2248", seat1);
-		backTrain1.put("D2228", seat1);
-		backTrain1.put("D2244", seat1);
-		backTrain1.put("D2202", seat1);
-		backTrain1.put("D638", seat1);
-		backTrain1.put("G308", seat1);
-		backTrain1.put("D2224", seat1);
-		backTrain1.put("G1318", seat1);
-		backTrain1.put("D354", seat1);
-		backTrain1.put("D2208", seat1);
-		backTrain1.put("D2256", seat1);
-		backTrain1.put("D2264", seat1);
-		backTrain1.put("D2238", seat1);
-		backTrain1.put("G314", seat1);
-		backTrain1.put("D2374", seat1);
-		backTrain1.put("Z96", seat1);
-		backTrain1.put("D2260", seat1);
-		backTrain1.put("D368", seat1);
-		backTrain1.put("D2278", seat1);
-		backTrain1.put("Z258", seat1);
-		backTrain1.put("Z50", seat1);
-		backTrain1.put("Z4", seat1);
-		backTrain1.put("D2252", seat1);
-
-		backTrain2.put("Z45", seat);
-		backTrain2.put("Z255", seat);
-		
-		backTrain3.put("Z258", seat);
-		backTrain3.put("D2264", seat1);
+        backTrain.put("G1148", seat1);
 
 		/*设置起止车站*/
-        config.add( new Config(City.荣昌, City.重庆, backTrain, backDates1) );
-        config.add( new Config(City.重庆, City.宜昌, backTrain1, backDates1) );
-        config.add( new Config(City.武汉, City.杭州, backTrain2, backDates) );
-        config.add( new Config(City.宜昌, City.杭州, backTrain3, backDates) );
+        config.add( new Config(City.宜昌, City.汉口, backTrain, backDates) );
 
 		return config.toArray(new Config[0]);
 	}
