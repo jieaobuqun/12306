@@ -74,9 +74,9 @@ public class Train {
 		// 屏幕能打印多少个状态码
 		final int screenSize = 34;
 		// 请求多少次显示一次HTTP状态码
-		final int timesShow = 1;
+		final int timesShow = 2;
         // 多少行状态码之后打印列车信息
-        final int lineNum = 5;
+        final int lineNum = 4;
 
 		// 总共多少url
 		int totalUrls = 0;
@@ -97,15 +97,17 @@ public class Train {
 			    System.out.println();
 			}
 
-			if (num > 1 && num % timesTrainInfo == 1) {
+			if (config[0].getUrls()[0] == url && num % timesTrainInfo == 1) {
                 System.out.print(buffer.toString());
                 buffer.setLength(0);
             }
 
-			if ((num == 0 || num % timesTrainInfo != 0) && num % timesShow == 0) {
-                System.out.print(statusCode + "  ");
-            } else {
-                buffer.append(statusCode + "  ");
+			if (num % timesShow == 0) {
+				if (num == 0 || num % timesTrainInfo != 0) {
+					System.out.print(statusCode + "  ");
+				} else {
+					buffer.append(statusCode + "  ");
+				}
             }
 			if (statusCode != 200) break label;
 

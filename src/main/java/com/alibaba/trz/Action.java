@@ -27,7 +27,7 @@ public class Action {
 		Date[] backDates = new Date[1];
 		
 		/*去程*/
-		cal.set(2017, 0, 22); // 1 月用0表示, 2表示3月		
+		cal.set(2017, 3, 28); // 1 月用0表示, 2表示3月
 		toDates[0] = cal.getTime();
 		
 		/*返回*/
@@ -35,17 +35,20 @@ public class Action {
 		backDates[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
-		Seat[] seat = {Seat.硬卧};
-		Seat[] seat1 = {Seat.二等座};
-		Map<String, Seat[]> toTrains = new HashMap<String, Seat[]>();
-        Map<String, Seat[]> backTrain = new HashMap<String, Seat[]>();
+		Seat[] seat1 = {Seat.硬卧};
+		//Seat[] seat2 = {Seat.二等座};
+		Map<String, Seat[]> toTrains1 = new HashMap<>();
+		Map<String, Seat[]> toTrains2 = new HashMap<>();
+        //Map<String, Seat[]> backTrain = new HashMap<>();
 
-		toTrains.put("Z257", seat);
+		toTrains1.put("Z47", seat1);
+		toTrains2.put("Z257", seat1);
 
-        backTrain.put("G1148", seat1);
+        //backTrain.put("G1148", seat1);
 
 		/*设置起止车站*/
-        config.add( new Config(City.宜昌, City.汉口, backTrain, backDates) );
+        config.add( new Config(City.杭州, City.武汉, toTrains1, toDates) );
+		config.add( new Config(City.杭州, City.宜昌, toTrains2, toDates) );
 
 		return config.toArray(new Config[0]);
 	}
