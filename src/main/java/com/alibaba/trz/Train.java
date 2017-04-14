@@ -74,7 +74,7 @@ public class Train {
 		// 屏幕能打印多少个状态码
 		final int screenSize = 34;
 		// 请求多少次显示一次HTTP状态码
-		final int timesShow = 2;
+		final int timesShow = 20;
         // 多少行状态码之后打印列车信息
         final int lineNum = 4;
 
