@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,9 +17,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
-import com.alibaba.trz.enums.Seat;
+import com.alibaba.trz.Enum.Seat;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -28,12 +33,17 @@ import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.jsoup.helper.StringUtil;
 
 public class Train {
 	
 	private Config []config;
 	
 	private int trainIndex = 0;
+
+	private String cookie;
+
+	private static final String initUrl = "https://kyfw.12306.cn/otn/leftTicket/init";
 	
 	private static CloseableHttpClient httpClient;
 	
@@ -70,14 +80,15 @@ public class Train {
 
 		// Get方法
 		HttpGet httpGet = new HttpGet(url);
+		httpGet.setHeader("cookie", cookie);
 		CloseableHttpResponse response = null;
 		
 		// 屏幕能打印多少个状态码
-		final int screenSize = 26;
+		final int screenSize = 32;
 		// 请求多少次显示一次HTTP状态码
 		final int timesShow = 2;
         // 多少行状态码之后打印列车信息
-        final int lineNum = 4;
+        final int lineNum = 1;
 
 		// 总共多少url
 		int totalUrls = 0;
@@ -115,32 +126,45 @@ public class Train {
 			HttpEntity entity = response.getEntity();
 			if (entity == null) break label;
 
-			String body = EntityUtils.toString(entity);
+			String body = EntityUtils.toString(entity, "UTF-8");
+
 			// parsing JSON
 			JSONObject result = JSONObject.parseObject(body);
-			JSONArray trains = result.getJSONArray("data");
+			JSONArray trains = result.getJSONObject("data").getJSONArray("result");
 			if (trains == null || trains.isEmpty()) break label;
 
 			int trainCount = conf.getTrainCount();
-			List<String> trainFound = new LinkedList<String>();
+			List<String> trainFound = new LinkedList<>();
 			for (Object obj : trains) {
-				JSONObject train = (JSONObject) obj;
-				JSONObject info = train.getJSONObject("queryLeftNewDTO");
-				String trainName = info.getString("station_train_code");
+                String train = (String) obj;
+                String[] fields = train.split("\\|");
+
+                // 计算位移
+                int index = 0;
+                while (fields[index].startsWith("预订") == false &&
+                       fields[index].startsWith("列车运行图调整") == false &&
+                       fields[index].startsWith("暂售至") == false &&
+                       fields[index].endsWith("起售") == false) {
+                    ++index;
+                }
+
+				String trainName = fields[index + 2];
+				String dateString = getDateString(fields[index + 12]);
 				Seat[] seats = conf.getSeats(trainName);
 				if (seats == null)
 					continue;
 				
 				trainCount--;
 				trainFound.add(trainName);
-				
+
 				if (num > 0 && num % timesTrainInfo == 0) {
 					System.out.format("train: %-5s    ", trainName);
-					System.out.print("date: " + getDateString(info.getString("start_train_date")) + "  ");
+					System.out.print("date: " + dateString + "  ");
 					System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
 					
 					for (Seat seat : seats)  {
-						System.out.format("  %3s:%-2s", seat.name(), info.getString(seat + "_num"));
+					    String seatNum = fields[index + 24 + seat.ordinal()];
+						System.out.format("  %3s:%-2s", seat.name(), StringUtil.isBlank(seatNum) ? "无" : seatNum);
 					}
 					
 					if (++trainIndex % 2 == 0)
@@ -151,13 +175,13 @@ public class Train {
 				
 				boolean hasTicket = false;
 				for (int i = 0; !hasTicket && i < seats.length; ++i){
-					if ( !info.getString(seats[i] + "_num").equals("无") && 
-						 !info.getString(seats[i] + "_num").equals("--") &&
-						 !info.getString(seats[i] + "_num").equals("*")) {
+                    String seatNum = fields[index + 20 + seats[i].ordinal()];
+					if ( StringUtil.isBlank(seatNum) == false &&
+                         !seatNum.equals("无") && !seatNum.equals("--") && !seatNum.equals("*")) {
                         System.out.format("train: %5s    ", trainName);
-                        System.out.print("date: " + getDateString(info.getString("start_train_date")) + "  ");
+                        System.out.print("date: " + dateString + "  ");
                         System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
-						System.out.format("  %3s:%2s", seats[i].name(), info.getString(seats[i] + "_num"));
+						System.out.format("  %3s:%2s", seats[i].name(), seatNum);
 						hasTicket = true;
 						break;
 					}	
@@ -184,44 +208,59 @@ public class Train {
 			
 			return false;
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 
 		try {
 			if (response != null)
 				response.close();
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 
 		return false;
 	}
 
-	private String getDateString(String date) {
-        StringBuilder builder = new StringBuilder();
+	public void init(){
+	    HttpGet httpGet = new HttpGet(initUrl);
+        httpClient = getClient();
+        try {
+            while (true) {
+                HttpResponse response = httpClient.execute(httpGet);
+                if (response.getStatusLine().getStatusCode() != 200) {
+                    continue;
+                }
 
-        char[] array = date.toCharArray();
+                Header[] headers = response.getHeaders("Set-Cookie");
+                StringBuilder  builder = new StringBuilder();
+                for (Header header : headers) {
+                    builder.append( header.getValue().split(";")[0]);
+                    builder.append(";");
+                }
 
-        int i = 0;
-        for (i = 0; i < 4; ++i) {
-            builder.append(array[i]);
-        }
-        builder.append('-');
-
-        for (; i < 6; ++i) {
-            if (array[i] != '0') {
-                builder.append(array[i]);
+                builder.append("RAIL_DEVICEID=QSTF_Pp5d0KigjzCtBW6mwr7-27Djped6eybGe-F6Onbm25_9Zb_xovg740-xeYIynXIwzrm" +
+                               "KKXZW5lthyM0PBWJgZNYy4Jj6OhPTd90jXUwornOW5QgbDacaAvfcHD1sCwdB3Ux9bMhPZFlh4zFOquQFvwc15h_");
+                cookie = builder.toString();
+                break;
             }
-        }
-        builder.append('-');
 
-        for (; i < 8; ++i) {
-            if (array[i] != '0') {
-                builder.append(array[i]);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        return builder.toString();
+    }
+
+	private String getDateString(String dateString) {
+        Date date = null;
+        DateFormat dateFormat1 = new SimpleDateFormat("yyyyMMdd");
+        DateFormat dateFormat2 = new SimpleDateFormat("yyyy-M-d");
+        try {
+            date = dateFormat1.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return dateFormat2.format(date);
     }
 	
 	public static CloseableHttpResponse getRequest (String url) {
@@ -234,7 +273,6 @@ public class Train {
 		
 		try {
 			response = httpClient.execute(httpGet);
-			//System.out.println( "Get request: " + response.getStatusLine() );
 		}  catch (Exception e) {
 		}
 		
@@ -268,7 +306,7 @@ public class Train {
 		}
 	}
 
-	private static CloseableHttpClient getClient () {
+	public static CloseableHttpClient getClient () {
 		if (httpClient != null)
 			return httpClient;
 

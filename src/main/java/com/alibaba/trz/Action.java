@@ -11,7 +11,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.alibaba.trz.enums.Seat;
+import com.alibaba.trz.Enum.City;
+import com.alibaba.trz.Enum.Seat;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -28,28 +29,33 @@ public class Action {
 		Date[] backDates = new Date[1];
 		
 		/*去程*/
-		cal.set(2017, 3, 28); // 1 月用0表示, 2表示3月
+		cal.set(2017, 8, 30); // 1 月用0表示, 2表示3月
 		toDates[0] = cal.getTime();
 		
 		/*返回*/
-		cal.set(2017, 2, 10);
+		cal.set(2017, 9, 8);
 		backDates[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
 		Seat[] seat1 = {Seat.硬卧};
-		//Seat[] seat2 = {Seat.二等座};
+
 		Map<String, Seat[]> toTrains1 = new HashMap<>();
 		Map<String, Seat[]> toTrains2 = new HashMap<>();
-        //Map<String, Seat[]> backTrain = new HashMap<>();
+        Map<String, Seat[]> backTrains1 = new HashMap<>();
+        Map<String, Seat[]> backTrains2 = new HashMap<>();
 
 		toTrains1.put("Z47", seat1);
-		toTrains2.put("Z257", seat1);
-
-        //backTrain.put("G1148", seat1);
+		toTrains1.put("Z257", seat1);
+        toTrains2.put("Z257", seat1);
+        backTrains1.put("Z45", seat1);
+        backTrains1.put("Z255", seat1);
+        backTrains2.put("Z258", seat1);
 
 		/*设置起止车站*/
         config.add( new Config(City.杭州, City.武汉, toTrains1, toDates) );
 		config.add( new Config(City.杭州, City.宜昌, toTrains2, toDates) );
+        config.add( new Config(City.武汉, City.杭州, backTrains1, backDates) );
+        config.add( new Config(City.宜昌, City.杭州, backTrains2, backDates) );
 
 		return config.toArray(new Config[0]);
 	}
