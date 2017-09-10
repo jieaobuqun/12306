@@ -1,4 +1,4 @@
-package com.alibaba.trz;
+package com.alibaba.trz.enums;
 
 public enum Seat {
 	商务座("swz"), 特等座("tz"), 一等座("zy"), 二等座("ze"), 高级软卧("gr"), 

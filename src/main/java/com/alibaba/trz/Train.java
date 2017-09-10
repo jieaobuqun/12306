@@ -13,6 +13,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
+import com.alibaba.trz.enums.Seat;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -72,9 +73,9 @@ public class Train {
 		CloseableHttpResponse response = null;
 		
 		// 屏幕能打印多少个状态码
-		final int screenSize = 34;
+		final int screenSize = 26;
 		// 请求多少次显示一次HTTP状态码
-		final int timesShow = 20;
+		final int timesShow = 2;
         // 多少行状态码之后打印列车信息
         final int lineNum = 4;
 

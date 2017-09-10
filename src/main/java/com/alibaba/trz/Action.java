@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import com.alibaba.trz.enums.Seat;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
