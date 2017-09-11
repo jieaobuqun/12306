@@ -50,9 +50,9 @@ public class Train {
 
 	private static final String initUrl = "https://kyfw.12306.cn/otn/leftTicket/init";
 
-	private static final String proxyIp = "111.13.7.42";
+	private static final String proxyIp = "116.62.239.121";
 
-	private static final int proxyPort = 81;
+	private static final int proxyPort = 3128;
 	
 	private static CloseableHttpClient httpClient;
 	
