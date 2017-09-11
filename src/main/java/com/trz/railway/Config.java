@@ -1,7 +1,7 @@
-package com.alibaba.trz;
+package com.trz.railway;
 
-import com.alibaba.trz.Enum.City;
-import com.alibaba.trz.Enum.Seat;
+import com.trz.railway.Enum.City;
+import com.trz.railway.Enum.Seat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package com.alibaba.trz;
+package com.trz.railway;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,22 +17,27 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
-import com.alibaba.trz.Enum.Seat;
+import com.trz.railway.Enum.Seat;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
 import org.jsoup.helper.StringUtil;
 
 public class Train {
@@ -44,6 +49,10 @@ public class Train {
 	private String cookie;
 
 	private static final String initUrl = "https://kyfw.12306.cn/otn/leftTicket/init";
+
+	private static final String proxyIp = "111.13.7.42";
+
+	private static final int proxyPort = 81;
 	
 	private static CloseableHttpClient httpClient;
 	
@@ -225,7 +234,7 @@ public class Train {
 	    HttpGet httpGet = new HttpGet(initUrl);
         httpClient = getClient();
         try {
-            while (true) {
+			while (true) {
                 HttpResponse response = httpClient.execute(httpGet);
                 if (response.getStatusLine().getStatusCode() != 200) {
                     continue;
@@ -326,7 +335,10 @@ public class Train {
 			return null;
 		}
 
-		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+		HttpHost proxy = new HttpHost(proxyIp, proxyPort);
+		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
+
+		CloseableHttpClient client = HttpClients.custom().setRoutePlanner(routePlanner).setSSLSocketFactory(sslsf).build();
 		return client;
 	}
 

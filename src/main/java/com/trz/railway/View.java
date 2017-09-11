@@ -1,4 +1,4 @@
-package com.alibaba.trz;
+package com.trz.railway;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

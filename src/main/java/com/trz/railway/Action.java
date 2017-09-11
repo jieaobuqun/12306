@@ -1,4 +1,4 @@
-package com.alibaba.trz;
+package com.trz.railway;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,8 +11,9 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.alibaba.trz.Enum.City;
-import com.alibaba.trz.Enum.Seat;
+import com.trz.railway.Enum.City;
+import com.trz.railway.Enum.Seat;
+
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
