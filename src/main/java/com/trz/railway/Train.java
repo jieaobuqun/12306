@@ -73,7 +73,7 @@ public class Train {
 					if (hasTicket) return;
 					
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -95,9 +95,9 @@ public class Train {
 		// 屏幕能打印多少个状态码
 		final int screenSize = 32;
 		// 请求多少次显示一次HTTP状态码
-		final int timesShow = 2;
+		final int timesShow = 10;
         // 多少行状态码之后打印列车信息
-        final int lineNum = 1;
+        final int lineNum = 8;
 
 		// 总共多少url
 		int totalUrls = 0;
@@ -153,7 +153,8 @@ public class Train {
                 while (fields[index].startsWith("预订") == false &&
                        fields[index].startsWith("列车运行图调整") == false &&
                        fields[index].startsWith("暂售至") == false &&
-                       fields[index].endsWith("起售") == false) {
+                       fields[index].endsWith("起售") == false &&
+					   fields[index].endsWith("系统维护时间") == false) {
                     ++index;
                 }
 
@@ -172,7 +173,7 @@ public class Train {
 					System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
 					
 					for (Seat seat : seats)  {
-					    String seatNum = fields[index + 24 + seat.ordinal()];
+					    String seatNum = fields[index + 20 + seat.ordinal()];
 						System.out.format("  %3s:%-2s", seat.name(), StringUtil.isBlank(seatNum) ? "无" : seatNum);
 					}
 					
@@ -198,7 +199,7 @@ public class Train {
 				
 				if (!hasTicket) continue;
 				
-				for (int i = 0; i < 2; ++i) {
+				for (int i = 0; i < 3; ++i) {
                     playVideo();
                 }
 				return true;
@@ -247,8 +248,9 @@ public class Train {
                     builder.append(";");
                 }
 
-                builder.append("RAIL_DEVICEID=QSTF_Pp5d0KigjzCtBW6mwr7-27Djped6eybGe-F6Onbm25_9Zb_xovg740-xeYIynXIwzrm" +
-                               "KKXZW5lthyM0PBWJgZNYy4Jj6OhPTd90jXUwornOW5QgbDacaAvfcHD1sCwdB3Ux9bMhPZFlh4zFOquQFvwc15h_");
+                builder.append("RAIL_DEVICEID=G-oxyeEftPJvweWTgAVRP_Q3bNhg-bLeT_L07cQ1oTFXqA_S41kukUv8yQ4gsjRIo" +
+                        "EJBWJoxFJK3MNRgOExI6lwo4_6HMX6awxEPNHPCz_sFZA5cKqsPMtBVzgyd6q5sMaQO7hgl2YaKHWOARBjGHXn" +
+                        "J4cM03y3m;");
                 cookie = builder.toString();
                 break;
             }
@@ -335,10 +337,10 @@ public class Train {
 			return null;
 		}
 
-		HttpHost proxy = new HttpHost(proxyIp, proxyPort);
-		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
+		//HttpHost proxy = new HttpHost(proxyIp, proxyPort);
+		//DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 
-		CloseableHttpClient client = HttpClients.custom().setRoutePlanner(routePlanner).setSSLSocketFactory(sslsf).build();
+		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 		return client;
 	}
 

@@ -27,11 +27,14 @@ public class Action {
 		/*设置日期*/
 		Calendar cal = Calendar.getInstance();
 		Date[] toDates = new Date[1];
+        Date[] toDates1 = new Date[1];
 		Date[] backDates = new Date[1];
 		
 		/*去程*/
 		cal.set(2017, 8, 30); // 1 月用0表示, 2表示3月
 		toDates[0] = cal.getTime();
+		cal.set(2017, 9, 1);
+        toDates1[0] = cal.getTime();
 		
 		/*返回*/
 		cal.set(2017, 9, 8);
@@ -39,24 +42,36 @@ public class Action {
 		
 		/*设置车次和座位信息*/
 		Seat[] seat1 = {Seat.硬卧};
+        Seat[] seat2 = {Seat.二等座};
 
 		Map<String, Seat[]> toTrains1 = new HashMap<>();
 		Map<String, Seat[]> toTrains2 = new HashMap<>();
+        Map<String, Seat[]> toTrains3 = new HashMap<>();
         Map<String, Seat[]> backTrains1 = new HashMap<>();
         Map<String, Seat[]> backTrains2 = new HashMap<>();
+        Map<String, Seat[]> backTrains3 = new HashMap<>();
 
 		toTrains1.put("Z47", seat1);
 		toTrains1.put("Z257", seat1);
         toTrains2.put("Z257", seat1);
+        toTrains3.put("D2222", seat2);
+        toTrains3.put("D656", seat2);
+        toTrains3.put("D2262", seat2);
+        toTrains3.put("D2246", seat2);
         backTrains1.put("Z45", seat1);
         backTrains1.put("Z255", seat1);
         backTrains2.put("Z258", seat1);
+        backTrains2.put("D2248", seat2);
+        backTrains2.put("D2224", seat2);
+        backTrains2.put("D2264", seat2);
 
 		/*设置起止车站*/
         config.add( new Config(City.杭州, City.武汉, toTrains1, toDates) );
 		config.add( new Config(City.杭州, City.宜昌, toTrains2, toDates) );
+        config.add( new Config(City.杭州, City.宜昌, toTrains3, toDates1) );
         config.add( new Config(City.武汉, City.杭州, backTrains1, backDates) );
         config.add( new Config(City.宜昌, City.杭州, backTrains2, backDates) );
+        config.add( new Config(City.宜昌, City.南京, backTrains3, backDates) );
 
 		return config.toArray(new Config[0]);
 	}
