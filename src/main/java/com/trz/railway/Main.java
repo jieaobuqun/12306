@@ -4,14 +4,15 @@ package com.trz.railway;
 public class Main {
 
 	public static void main(String[] args) throws Exception {
-		Config[] config = Action.setConfig();
-		Train train = new Train(config);
+	    /* 模拟登录 */
+		Command.login();
 
-		train.init();
-		train.refreshTickets();
-		Train.closeClient();
+        /* 进行刷票 */
+        TrainConfig[] config = Command.setTrainConfig();
+        Train train = new Train(config);
 
-		//Action.login();
-
+        train.init();
+        train.refreshTickets();
+        Train.closeClient();
 	}
 }

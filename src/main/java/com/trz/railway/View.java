@@ -17,26 +17,23 @@ import javax.swing.JPanel;
 public class View extends JFrame implements ActionListener, MouseListener {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private String url;
-	
-	private Bean bean;
-	
+
+	private String randCode;
+
 	private ImagePanel image;
 
-	public View(String title, String url, Bean bean) {
+	public View(String title) {
 		super(title);
-		this.url = url;
-		this.bean = bean;
 		this.setSize(305, 270);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(View.DISPOSE_ON_CLOSE);
 	}
 
+    /**
+     * 初始化验证码
+     */
 	public void captcha() {
-		// This is an empty content area in the frame
-		image = new ImagePanel(Action.getImage(url));
-		this.add(image);
+		image = new ImagePanel(Command.getImage(Constant.CAPTCHA_URL));
 
 		this.getContentPane().add(image, BorderLayout.CENTER);
 		
@@ -55,35 +52,42 @@ public class View extends JFrame implements ActionListener, MouseListener {
 		this.setVisible(true);
 	}
 
+    /**
+     * 刷新
+     */
+	public void refresh() {
+        this.getContentPane().remove(image);
+        image = new ImagePanel(Command.getImage(Constant.CAPTCHA_URL));
+
+        this.getContentPane().add(image, BorderLayout.CENTER);
+        this.validate();
+        image.addMouseListener(this);
+	}
+
+    @Override
 	public void actionPerformed(ActionEvent e) {
 		if ( e.getActionCommand().equals("刷新") ) {
-			this.getContentPane().remove(image);
-			image = new ImagePanel(Action.getImage(url));
-			
-			this.getContentPane().add(image, BorderLayout.CENTER);
-			this.validate();
-			image.addMouseListener(this);
+            refresh();
 		} else {
-			synchronized (bean) {
-				bean.notify();
+			synchronized (Command.class) {
+                Command.class.notify();
 			}
 			this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 		}
 	}
 
+    @Override
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
-		
-		String randCode = bean.getRandCode();
+
 		if (randCode == null)
 			randCode = x + "," + y;
 		else
 			randCode += "," + x + "," + y;
-		bean.setRandCode(randCode);
-		
+
 		Graphics graph = image.getGraphics();
-		BufferedImage icon = Action.getImage();
+		BufferedImage icon = Command.getImage();
 		graph.drawImage(icon, x-13, y-13, null);
 	}
 
@@ -94,6 +98,10 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	public void mouseEntered(MouseEvent e) {}
 
 	public void mouseExited(MouseEvent e) {}
+
+	public String getRandCode() {
+        return randCode;
+	}
 }
 
 class ImagePanel extends JPanel {
@@ -105,6 +113,7 @@ class ImagePanel extends JPanel {
     public ImagePanel(BufferedImage image) {
         this.image = image;
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

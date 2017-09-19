@@ -1,15 +1,15 @@
 package com.trz.railway;
 
-import com.trz.railway.Enum.City;
-import com.trz.railway.Enum.Seat;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Config {
+import com.trz.railway.Enum.City;
+import com.trz.railway.Enum.Seat;
+
+public class TrainConfig {
 	
 	private String []url;
 	
@@ -19,8 +19,8 @@ public class Config {
 	
 	private Map<String, Seat[]> trainSeatsMap;
 	
-	public Config (City fromCity, City toCity, Map<String, Seat[]> trainSeatsMap,
-			Date[] dates) {
+	public TrainConfig(City fromCity, City toCity, Map<String, Seat[]> trainSeatsMap,
+					   Date[] dates) {
 		this.fromCity = fromCity;
 		this.toCity = toCity;
 		this.trainSeatsMap = trainSeatsMap;
@@ -51,7 +51,7 @@ public class Config {
 		return trainSeatsMap.get(train);
 	}
 	
-	public List<String> getAbesentTrain (List<String> trains) {
+	public List<String> getAbsentTrain(List<String> trains) {
 		List<String> result = new LinkedList<String>();
 	    for ( Map.Entry<String, Seat[]> pair : trainSeatsMap.entrySet() ) {
 	        if ( trains.indexOf( pair.getKey() ) == -1 )
