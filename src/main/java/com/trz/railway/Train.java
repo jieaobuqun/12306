@@ -52,6 +52,10 @@ public class Train {
      */
     private TrainConfig[]               config;
     /**
+     * 刷票成功时列车信息
+     */
+    private TrainInfo                    trainInfo = new TrainInfo();
+    /**
      * 代理IP
      */
     private static final String         proxyIp = "120.55.38.20";
@@ -208,6 +212,17 @@ public class Train {
                         System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
                         System.out.format("  %3s:%2s", seats[i].name(), seatNum);
                         hasTicket = true;
+
+                        /* 设置列车信息*/
+                        trainInfo.secretStr = "";
+                        trainInfo.train_date = dateString;
+                        trainInfo.back_train_date = dateString;
+                        trainInfo.tour_flag = "dc";
+                        trainInfo.purpose_codes = "ADULT";
+                        trainInfo.query_from_station_name = conf.getFromCity().name();
+                        trainInfo.query_to_station_name = conf.getToCity().name();
+                        trainInfo.undefined = "";
+
                         break;
                     }
                 }
@@ -215,7 +230,7 @@ public class Train {
                 if (!hasTicket) { continue; }
 
                 for (int i = 0; i < 2; ++i) {
-                    playVideo();
+                    //playVideo();
                 }
                 return true;
 
@@ -460,5 +475,22 @@ public class Train {
             auline.drain();
             auline.close();
         }
+    }
+
+    public TrainInfo getTrainInfo() {
+        return trainInfo;
+    }
+
+
+    public class TrainInfo {
+        public String secretStr;
+        public String train_date;
+        /** 这个不重要 */
+        public String back_train_date;
+        public String tour_flag;
+        public String purpose_codes;
+        public String query_from_station_name;
+        public String query_to_station_name;
+        public String undefined;
     }
 }

@@ -24,7 +24,7 @@ public class View extends JFrame implements ActionListener, MouseListener {
 
 	public View(String title) {
 		super(title);
-		this.setSize(305, 270);
+		this.setSize(295, 260);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(View.DISPOSE_ON_CLOSE);
 	}
@@ -80,11 +80,13 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
+		int randX = x;
+		int randY = y - 30;
 
 		if (randCode == null)
-			randCode = x + "," + y;
+			randCode = randX + "," + randY;
 		else
-			randCode += "," + x + "," + y;
+			randCode += "," + randX + "," + randY;
 
 		Graphics graph = image.getGraphics();
 		BufferedImage icon = Command.getImage();

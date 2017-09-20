@@ -23,8 +23,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.trz.railway.Enum.City;
 import com.trz.railway.Enum.Seat;
+import com.trz.railway.Train.TrainInfo;
 
 public class Command {
+
+    private static Train train;
 
     /**
      * 设置配置信息
@@ -51,10 +54,12 @@ public class Command {
 		/*设置车次和座位信息*/
         Seat[] seat1 = {Seat.硬卧};
         Seat[] seat2 = {Seat.二等座};
+        Seat[] seat3 = {Seat.无座};
 
         Map<String, Seat[]> toTrains1 = new HashMap<>();
         Map<String, Seat[]> toTrains2 = new HashMap<>();
         Map<String, Seat[]> toTrains3 = new HashMap<>();
+        Map<String, Seat[]> toTrains4 = new HashMap<>();
         Map<String, Seat[]> backTrains1 = new HashMap<>();
         Map<String, Seat[]> backTrains2 = new HashMap<>();
         Map<String, Seat[]> backTrains3 = new HashMap<>();
@@ -66,6 +71,7 @@ public class Command {
         toTrains3.put("D656", seat2);
         toTrains3.put("D2262", seat2);
         toTrains3.put("D2246", seat2);
+        toTrains4.put("K351", seat3);
         backTrains1.put("Z45", seat1);
         backTrains1.put("Z255", seat1);
         backTrains2.put("Z258", seat1);
@@ -75,6 +81,7 @@ public class Command {
 
 		/*设置起止车站*/
         trainConfig.add(new TrainConfig(City.杭州, City.武汉, toTrains1, toDates));
+        trainConfig.add(new TrainConfig(City.杭州, City.武汉, toTrains4, toDates1));
         trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains2, toDates));
         trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains3, toDates1));
         trainConfig.add(new TrainConfig(City.武汉, City.杭州, backTrains1, backDates));
@@ -82,6 +89,62 @@ public class Command {
         trainConfig.add(new TrainConfig(City.宜昌, City.南京, backTrains3, backDates));
 
         return trainConfig.toArray(new TrainConfig[0]);
+    }
+
+    /**
+     * 刷票
+     */
+    public static void refreshTickets() {
+        TrainConfig[] config = Command.setTrainConfig();
+        train = new Train(config);
+
+        train.init();
+        train.refreshTickets();
+    }
+
+    /**
+     * 模拟选择
+     */
+    public static void submit() {
+        JSONObject object;
+        CloseableHttpResponse response;
+        List<NameValuePair> params = new ArrayList<>();
+
+        /* 第一步，检查是否登录 */
+        while (true) {
+            params.add(new BasicNameValuePair("_json_att", ""));
+            response = Command.request(Constant.SUBMIT_CHECK_USER_URL, null);
+
+            object = parseResponse(response);
+
+            if (object != null) {
+                System.out.println("提交时，校验登录态失败！");
+                System.out.println(object);
+                login();
+                continue;
+            } else {
+                break;
+            }
+        }
+
+        /* 第二步，获取特殊加密码 */
+        TrainInfo trainInfo = train.getTrainInfo();
+        params.clear();
+
+        params.add(new BasicNameValuePair("secretStr", trainInfo.secretStr));
+        params.add(new BasicNameValuePair("train_date", trainInfo.train_date));
+        params.add(new BasicNameValuePair("back_train_date", trainInfo.back_train_date));
+        params.add(new BasicNameValuePair("purpose_codes", trainInfo.purpose_codes));
+        params.add(new BasicNameValuePair("query_from_station_name", trainInfo.query_from_station_name));
+        params.add(new BasicNameValuePair("undefined", trainInfo.undefined));
+
+        Command.request(Constant.SUBMIT_REQUEST_URL, params);
+
+        params.clear();
+        params.add(new BasicNameValuePair("_json_att", ""));
+        Command.request(Constant.SUBMIT_INIT_URL, params);
+
+        Train.closeClient();
     }
 
     /**
@@ -114,16 +177,9 @@ public class Command {
 
             response = Command.request(Constant.CAPTCHA_CHECK_URL, params);
 
-            try {
-                String body = EntityUtils.toString(response.getEntity());
-                JSONObject object = JSON.parseObject(body);
-                Train.closeResponse(response);
-
-                if (object.get("result_code").equals("4") == false) {
-                    continue;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            JSONObject object = parseResponse(response);
+            if (object.get("result_code").toString().equals("4") == false) {
+                continue;
             }
 
             /* 登录 */
@@ -139,17 +195,11 @@ public class Command {
 
             response = Command.request(Constant.LOGIN_SUBMIT_URL, params);
 
-            try {
-                String body = EntityUtils.toString(response.getEntity());
-                JSONObject object = JSON.parseObject(body);
-                if (object.get("result_code").equals("0") == false) {
-                    continue;
-                } else {
-                    break;
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            object = parseResponse(response);
+            if (object.get("result_code").toString().equals("0") == false) {
+                continue;
+            } else {
+                break;
             }
         }
     }
@@ -200,5 +250,23 @@ public class Command {
         }
 
         return response;
+    }
+
+    /**
+     * 解析返回的JSON对象
+     */
+    private static JSONObject parseResponse(CloseableHttpResponse response) {
+        JSONObject object = null;
+
+        try {
+            String body = EntityUtils.toString(response.getEntity());
+            object = JSON.parseObject(body);
+            Train.closeResponse(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+
+        return object;
     }
 }

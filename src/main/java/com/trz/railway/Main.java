@@ -8,11 +8,9 @@ public class Main {
 		Command.login();
 
         /* 进行刷票 */
-        TrainConfig[] config = Command.setTrainConfig();
-        Train train = new Train(config);
+        Command.refreshTickets();
 
-        train.init();
-        train.refreshTickets();
-        Train.closeClient();
+        /* 模拟提交 */
+        Command.submit();
 	}
 }
