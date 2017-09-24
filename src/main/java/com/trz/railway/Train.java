@@ -3,6 +3,7 @@ package com.trz.railway;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
@@ -20,7 +21,6 @@ import javax.sound.sampled.SourceDataLine;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -54,7 +54,7 @@ public class Train {
     /**
      * 刷票成功时列车信息
      */
-    private TrainInfo                    trainInfo = new TrainInfo();
+    private TrainInfo                   trainInfo = new TrainInfo();
     /**
      * 代理IP
      */
@@ -117,9 +117,9 @@ public class Train {
         // 屏幕能打印多少个状态码
         final int screenSize = 36;
         // 请求多少次显示一次HTTP状态码
-        final int timesShow = 2;
+        final int timesShow = 80;
         // 多少行状态码之后打印列车信息
-        final int lineNum = 1;
+        final int lineNum = 4;
 
         // 总共多少url
         int totalUrls = 0;
@@ -214,7 +214,7 @@ public class Train {
                         hasTicket = true;
 
                         /* 设置列车信息*/
-                        trainInfo.secretStr = "";
+                        trainInfo.secretStr = URLDecoder.decode(fields[0], Constant.UTF8_ENCODE);
                         trainInfo.train_date = dateString;
                         trainInfo.back_train_date = dateString;
                         trainInfo.tour_flag = "dc";
@@ -260,34 +260,6 @@ public class Train {
     }
 
     /**
-     * 初始化请求
-     */
-    public void init() {
-        HttpGet httpGet = new HttpGet(Constant.INIT_URL);
-        httpClient = getClient();
-        if (httpClient == null) { return; }
-
-        cookie.setCookie("RAIL_DEVICEID", "Gt43Gx4YEL8A2BIHpGV_jRn4LqI44fiHETjpO2S4itAMZf5"
-        + "mEtjlAn1DR332z1ZEmHGI9FDcAe1akY8bN0QL0uZWi21eR_raOtidElgbdNLnLRXZdbuelo3Jyghas5OZDkQBGCC3NjNa8NnxO_LGdEjWsE3tJMFV");
-        cookie.setCookie("RAIL_EXPIRATION", "150617059899");
-
-        try {
-            while (true) {
-                HttpResponse response = Train.execute(httpGet);
-                if (response.getStatusLine().getStatusCode() != 200) {
-                    continue;
-                }
-
-                break;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
      * 格式化日期字符串
      */
     private String getDateString(String dateString) {
@@ -312,6 +284,11 @@ public class Train {
 
         // Post方法
         HttpGet httpGet = new HttpGet(url);
+
+        httpGet.addHeader(new BasicHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"));
+        httpGet.addHeader(new BasicHeader("Accept-Encoding", "gzip, deflate, br"));
+
+
         CloseableHttpResponse response = null;
 
         try {
@@ -328,6 +305,7 @@ public class Train {
      */
     public static CloseableHttpResponse postRequest(String url, List<NameValuePair> params) {
         httpClient = getClient();
+
         if (httpClient == null) { return null; }
 
         // Post方法
@@ -383,7 +361,7 @@ public class Train {
         HttpHost proxy = new HttpHost(proxyIp, proxyPort);
         DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 
-        return HttpClients.custom().setRoutePlanner(routePlanner).setSSLSocketFactory(sslsf).build();
+        return HttpClients.custom().setSSLSocketFactory(sslsf).build();
     }
 
     /**

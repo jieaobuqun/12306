@@ -39,6 +39,8 @@ public class Cookie {
     }
 
     private Cookie() {
+        String initCookie = "RAIL_DEVICEID=OwSTnp4tV86HdAt2M4Xs6widV9lJhP1tTv45uHkN_s_rt4Lmr68DoJiTk0juWb1PMfY590k5wKHTvpv1kpRN7nn46NLco_Fl-SoPAYhUBcaSxrVLgflv4g6U_AeaeGAfjHmXsWtbojJGnRH99A-CfO9GfCVM3Ady;RAIL_EXPIRATION=1506308483429;fp_ver=4.5.1;_jc_save_wfdc_flag=dc; current_captcha_type=Z;";
+        this.setCookie(initCookie);
     }
 
 
@@ -75,6 +77,8 @@ public class Cookie {
     public void setCookie(String key, String value) {
         cookieMap.put(key, value);
     }
+
+    public void removeCookie(String key) {cookieMap.remove(key);}
 
     /**
      * 设置单条Cookie
