@@ -19,6 +19,9 @@ public class Configuration {
     /** 密码 */
     private String password;
 
+    /** 乘客姓名 */
+    private String passenger;
+
     /** 属性连接符 */
     private static final String LINK_CHAR = "=";
 
@@ -94,5 +97,13 @@ public class Configuration {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPassenger() {
+        return passenger;
+    }
+
+    public void setPassenger(String passenger) {
+        this.passenger = passenger;
     }
 }

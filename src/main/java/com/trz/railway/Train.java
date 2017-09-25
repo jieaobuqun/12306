@@ -117,9 +117,10 @@ public class Train {
         // 屏幕能打印多少个状态码
         final int screenSize = 36;
         // 请求多少次显示一次HTTP状态码
-        final int timesShow = 80;
+        final int timesShow = 2;
         // 多少行状态码之后打印列车信息
         final int lineNum = 4;
+
 
         // 总共多少url
         int totalUrls = 0;
@@ -230,7 +231,7 @@ public class Train {
                 if (!hasTicket) { continue; }
 
                 for (int i = 0; i < 2; ++i) {
-                    //playVideo();
+                    playVideo();
                 }
                 return true;
 

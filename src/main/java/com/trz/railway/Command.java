@@ -19,6 +19,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import com.trz.railway.Enum.City;
@@ -27,9 +28,15 @@ import com.trz.railway.Train.TrainInfo;
 
 public class Command {
 
-    private static Train train;
+    private static Train            train;
 
-    private static String tk = "n02wApxJuOc0hero_NjApQAc7F7tV8tdFZA35Q51j2j0";
+    private static String           uamtk;
+
+    private static String           tk;
+
+    private static Cookie           cookie = Cookie.getInstance();
+
+    private static Configuration    configuration = Configuration.getInstance();
 
     /**
      * 设置配置信息
@@ -42,6 +49,7 @@ public class Command {
         Date[] toDates = new Date[1];
         Date[] toDates1 = new Date[1];
         Date[] backDates = new Date[1];
+        Date[] backDates1 = new Date[1];
 		
 		/*去程*/
         cal.set(2017, Calendar.SEPTEMBER, 30); // 1 月用0表示, 2表示3月
@@ -52,6 +60,8 @@ public class Command {
 		/*返回*/
         cal.set(2017, Calendar.OCTOBER, 8);
         backDates[0] = cal.getTime();
+        cal.set(2017, Calendar.SEPTEMBER, 28);
+        backDates1[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
         Seat[] seat1 = {Seat.硬卧};
@@ -61,15 +71,12 @@ public class Command {
         Map<String, Seat[]> toTrains1 = new HashMap<>();
         Map<String, Seat[]> toTrains2 = new HashMap<>();
         Map<String, Seat[]> toTrains3 = new HashMap<>();
-        Map<String, Seat[]> toTrains4 = new HashMap<>();
         Map<String, Seat[]> backTrains1 = new HashMap<>();
         Map<String, Seat[]> backTrains2 = new HashMap<>();
-        Map<String, Seat[]> backTrains3 = new HashMap<>();
 
-        toTrains1.put("Z47", seat1);
+        /*toTrains1.put("Z47", seat1);
         toTrains1.put("Z257", seat1);
         toTrains2.put("Z257", seat1);
-        toTrains2.put("D2188", seat2);
         toTrains3.put("D2222", seat2);
         toTrains3.put("D656", seat2);
         toTrains3.put("D2262", seat2);
@@ -79,17 +86,16 @@ public class Command {
         backTrains2.put("Z258", seat1);
         backTrains2.put("D2248", seat2);
         backTrains2.put("D2224", seat2);
-        backTrains2.put("D2264", seat2);
-        backTrains2.put("K254", seat3);
+        backTrains2.put("D2264", seat2);*/
+        backTrains2.put("D2222", seat2);
+
 
 		/*设置起止车站*/
-        trainConfig.add(new TrainConfig(City.杭州, City.武汉, toTrains1, toDates));
-        trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains4, toDates));
+        /*trainConfig.add(new TrainConfig(City.杭州, City.武汉, toTrains1, toDates));
         trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains2, toDates));
         trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains3, toDates1));
-        trainConfig.add(new TrainConfig(City.武汉, City.杭州, backTrains1, backDates));
-        trainConfig.add(new TrainConfig(City.宜昌, City.杭州, backTrains2, backDates));
-        trainConfig.add(new TrainConfig(City.宜昌, City.南京, backTrains3, backDates));
+        trainConfig.add(new TrainConfig(City.武汉, City.杭州, backTrains1, backDates));*/
+        trainConfig.add(new TrainConfig(City.杭州, City.南京, backTrains2, backDates1));
 
         return trainConfig.toArray(new TrainConfig[0]);
     }
@@ -112,12 +118,12 @@ public class Command {
         List<NameValuePair> params = new ArrayList<>();
 
         /* 第一步，检查是否登录 */
-        /*params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("_json_att", ""));
         response = Command.request(Constant.SUBMIT_CHECK_USER_URL, params);
 
         object = parseResponse(response);
 
-        if (object != null) {
+        if (object.getJSONObject("data").getBoolean("flag") == false) {
             System.out.println("提交时，校验登录态失败！");
             System.out.println(object);
             login();
@@ -145,6 +151,107 @@ public class Command {
         Command.request(Constant.SUBMIT_INIT_URL, params);
 
         Train.closeClient();
+
+        String repeatSubmitToken = "75c5e3ff84df94080cd4082da68814ae";
+
+
+        /* 第三步，提交订单 */
+        params.clear();
+        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+        response = Command.request(Constant.GET_PASSENGER_URL, params);
+        object = parseResponse(response);
+
+        JSONObject passenger = null;
+        JSONArray passengers = object.getJSONObject("data").getJSONArray("normal_passengers");
+        // 遍历获取乘客信息
+        for(Object item : passengers) {
+            JSONObject each = (JSONObject)item;
+
+            if (each.getString("passenger_name").equals(configuration.getPassenger())) {
+                passenger = each;
+                break;
+            }
+        }
+
+        if (passenger == null) {
+            System.out.println("找不到乘客：" + configuration.getPassenger() + "的信息");
+            return;
+        }
+
+        // 获取最新验证码信息
+        Command.request(Constant.GET_PASSCODE_NEW_URL, null);
+
+        // 检查订单信息
+        params.clear();
+        params.add(new BasicNameValuePair("cancel_flag", "2"));
+        params.add(new BasicNameValuePair("bed_level_order_num", "000000000000000000000000000000"));
+        params.add(new BasicNameValuePair("passengerTicketStr", "O,0,1,田睿智,1,500226198804276213,15968103684,N"));
+        params.add(new BasicNameValuePair("oldPassengerStr", "田睿智,1,500226198804276213,1_"));
+        params.add(new BasicNameValuePair("tour_flag", "dc"));
+        params.add(new BasicNameValuePair("randCode", ""));
+        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+
+        response = Command.request(Constant.CHECK_ORDER_URL, params);
+        object = parseResponse(response);
+
+        // 获取排队数量
+        params.clear();
+        params.add(new BasicNameValuePair("train_date", "Thu Sep 28 2017 00:00:00 GMT+0800 (CST)"));
+        params.add(new BasicNameValuePair("train_no", "56000D222250"));
+        params.add(new BasicNameValuePair("stationTrainCode", "D2222"));
+        params.add(new BasicNameValuePair("seatType", "O"));
+        params.add(new BasicNameValuePair("fromStationTelecode", "HGH"));
+        params.add(new BasicNameValuePair("toStationTelecode", "NKH"));
+        params.add(new BasicNameValuePair("leftTicket", "I25T%2BF%2B%2B83IK3TYbNuXwa07KuL70CS2E9NAVyDAmAY88pFEq"));
+        params.add(new BasicNameValuePair("purpose_codes", "00"));
+        params.add(new BasicNameValuePair("train_location", "H2"));
+        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+
+        response = Command.request(Constant.GET_QUEUE_COUNT_URL, params);
+        object = parseResponse(response);
+
+        // 确认排队
+        params.clear();
+        params.add(new BasicNameValuePair("passengerTicketStr", "O,0,1,田睿智,1,500226198804276213,15968103684,N"));
+        params.add(new BasicNameValuePair("oldPassengerStr", "田睿智,1,500226198804276213,1_"));
+        params.add(new BasicNameValuePair("randCode", ""));
+        params.add(new BasicNameValuePair("purpose_codes", "00"));
+        params.add(new BasicNameValuePair("key_check_isChange", "40A7B421F8CAC6A750B965AC92364EDB91A5194A18C39B9230678FC4"));
+        params.add(new BasicNameValuePair("leftTicket", "I25T%2BF%2B%2B83IK3TYbNuXwa07KuL70CS2E9NAVyDAmAY88pFEq"));
+        params.add(new BasicNameValuePair("train_location", "H2"));
+        params.add(new BasicNameValuePair("choose_seats", ""));
+        params.add(new BasicNameValuePair("seatDetailType", "000"));
+        params.add(new BasicNameValuePair("roomType", "00"));
+        params.add(new BasicNameValuePair("dwAll", "N"));
+        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+
+        response = Command.request(Constant.CONFIRM_QUEUE_URL, params);
+        object = parseResponse(response);
+
+        // 查询排队时间
+        response = Command.request(Constant.ORDER_WAIT_TIME_URL + repeatSubmitToken, null);
+        object = parseResponse(response);
+
+        // 确认排队结果
+        params.clear();
+        params.add(new BasicNameValuePair("orderSequence_no", "E542818733"));
+        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+
+        response = Command.request(Constant.RESULT_ORDER_QUEUE_URL, params);
+        object = parseResponse(response);
+
+        // 请求订单页面
+        params.clear();
+        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+
+        response = Command.request(Constant.PAY_ORDER_INIT_URL, params);
+        object = parseResponse(response);
     }
 
     /**
@@ -219,12 +326,11 @@ public class Command {
             CloseableHttpResponse response = Command.request(Constant.CAPTCHA_CHECK_URL, params);
 
             JSONObject object = parseResponse(response);
-            if (object.get("result_code").toString().equals("4") == false) {
+            if (object.getInteger("result_code").equals(4) == false) {
                 continue;
             }
 
             /* 登录 */
-            Configuration configuration = Configuration.getInstance();
             String username = configuration.getUserName();
             String password = configuration.getPassword();
 
@@ -237,11 +343,17 @@ public class Command {
             response = Command.request(Constant.LOGIN_SUBMIT_URL, params);
 
             object = parseResponse(response);
-            if (object.get("result_code").toString().equals("0") == false) {
+            if (object.getInteger("result_code").equals(0) == false) {
                 continue;
             }
 
+            uamtk = object.getString("uamtk");
+
+            cookie.removeCookie("uamtk");
+            Command.request(Constant.LOGIN_REDIRECT_URL, null);
+
             /* 请求验证 */
+            cookie.setCookie("uamtk", uamtk);
             params.add(new BasicNameValuePair("appid", "otn"));
             response = Command.request(Constant.LOGIN_AUTH_URL, params);
             object = parseResponse(response);
@@ -249,12 +361,17 @@ public class Command {
                                                               object.getString("apptk");
 
             /* 请求CLIENT */
-            Cookie.getInstance().removeCookie("uamtk");
+            cookie.removeCookie("uamtk");
             params.clear();
             params.add(new BasicNameValuePair("tk", tk));
             params.add(new BasicNameValuePair("_json_att", ""));
             response = Command.request(Constant.LOGIN_AUTH_CLIENT_URL, params);
             object = parseResponse(response);
+
+            if (object.getInteger("result_code").equals(0) == false) {
+                continue;
+            }
+
             break;
         }
     }
