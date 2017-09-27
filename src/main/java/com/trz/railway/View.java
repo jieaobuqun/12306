@@ -80,13 +80,12 @@ public class View extends JFrame implements ActionListener, MouseListener {
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
-		int randX = x;
 		int randY = y - 30;
 
 		if (randCode == null)
-			randCode = randX + "," + randY;
+			randCode = x + "," + randY;
 		else
-			randCode += "," + randX + "," + randY;
+			randCode += "," + x + "," + randY;
 
 		Graphics graph = image.getGraphics();
 		BufferedImage icon = Command.getImage();

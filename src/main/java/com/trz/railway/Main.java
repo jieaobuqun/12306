@@ -4,9 +4,11 @@ package com.trz.railway;
 public class Main {
 
 	public static void main(String[] args) throws Exception {
+	    /* 初始化 */
+	    Command.init();
 
 	    /* 模拟登录 */
-		//Command.login();
+		Command.login();
 
         /* 进行刷票 */
         Command.refreshTickets();

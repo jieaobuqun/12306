@@ -25,16 +25,16 @@ public class Configuration {
     /** 属性连接符 */
     private static final String LINK_CHAR = "=";
 
-    /**
-     * 初始化
-     */
+    /* 初始化 */
     static {
         ClassLoader classLoader = Train.class.getClassLoader();
         URL url = classLoader.getResource("config");
+        BufferedReader reader = null;
+
         if (url != null) {
             File file = new File(url.getFile());
             try {
-                BufferedReader reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 String line;
                 while ((line = reader.readLine()) != null ) {
                     if (StringUtils.isBlank(line)) {
@@ -68,6 +68,13 @@ public class Configuration {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -87,6 +94,7 @@ public class Configuration {
         return userName;
     }
 
+    @SuppressWarnings("unused")
     public void setUserName(String userName) {
         this.userName = userName;
     }
@@ -95,6 +103,7 @@ public class Configuration {
         return Security.aesDecrypt(password);
     }
 
+    @SuppressWarnings("unused")
     public void setPassword(String password) {
         this.password = password;
     }
@@ -103,6 +112,7 @@ public class Configuration {
         return passenger;
     }
 
+    @SuppressWarnings("unused")
     public void setPassenger(String passenger) {
         this.passenger = passenger;
     }

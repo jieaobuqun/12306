@@ -9,6 +9,7 @@ import sun.misc.BASE64Encoder;
 /**
  * @author jieaobuqun  2017-09-18.
  */
+@SuppressWarnings("unused")
 public class Security {
 
     /** 加密算法 */

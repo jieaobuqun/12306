@@ -9,6 +9,7 @@ import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,16 +23,21 @@ import javax.sound.sampled.SourceDataLine;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
@@ -41,6 +47,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.trz.railway.Enum.Seat;
 
+@SuppressWarnings("unused")
 public class Train {
 
     /**
@@ -64,13 +71,19 @@ public class Train {
      */
     private static final int            proxyPort = 3128;
     /**
-     * Cookie
-     */
-    private static Cookie               cookie = Cookie.getInstance();
-    /**
      * 请求客户端
      */
     private static CloseableHttpClient  httpClient;
+    /**
+     * Cookie tore
+     */
+    public static CookieStore          cookieStore;
+
+
+    static {
+        setCookieStore();
+        setClient();
+    }
 
 
     public Train(TrainConfig[] config) {
@@ -106,10 +119,8 @@ public class Train {
     /**
      * 发送HTTP请求
      */
+    @SuppressWarnings("all")
     private boolean request(int num, String url, TrainConfig conf, StringBuilder buffer) {
-        httpClient = getClient();
-        if (httpClient == null) { return true; }
-
         // Get方法
         HttpGet httpGet = new HttpGet(url);
         CloseableHttpResponse response = null;
@@ -222,7 +233,7 @@ public class Train {
                         trainInfo.purpose_codes = "ADULT";
                         trainInfo.query_from_station_name = conf.getFromCity().name();
                         trainInfo.query_to_station_name = conf.getToCity().name();
-                        trainInfo.undefined = "";
+                        trainInfo.undefined = null;
 
                         break;
                     }
@@ -230,9 +241,9 @@ public class Train {
 
                 if (!hasTicket) { continue; }
 
-                for (int i = 0; i < 2; ++i) {
+                /*for (int i = 0; i < 2; ++i) {
                     playVideo();
-                }
+                }*/
                 return true;
 
             }
@@ -280,16 +291,8 @@ public class Train {
      * 获取请求应答
      */
     public static CloseableHttpResponse getRequest(String url) {
-        httpClient = getClient();
-        if (httpClient == null) { return null; }
-
-        // Post方法
+        // Get方法
         HttpGet httpGet = new HttpGet(url);
-
-        httpGet.addHeader(new BasicHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"));
-        httpGet.addHeader(new BasicHeader("Accept-Encoding", "gzip, deflate, br"));
-
-
         CloseableHttpResponse response = null;
 
         try {
@@ -305,10 +308,6 @@ public class Train {
      * 发送POST请求
      */
     public static CloseableHttpResponse postRequest(String url, List<NameValuePair> params) {
-        httpClient = getClient();
-
-        if (httpClient == null) { return null; }
-
         // Post方法
         HttpPost httpPost = new HttpPost(url);
         CloseableHttpResponse response = null;
@@ -331,18 +330,43 @@ public class Train {
         try {
             if (response != null) { response.close(); }
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
     /**
-     * 获取请求客户端
+     * 设置CookieStore
      */
-    private static CloseableHttpClient getClient() {
-        if (httpClient != null) { return httpClient; }
+    public static void setCookieStore() {
+        if (cookieStore != null) { return; }
+
+        cookieStore = new BasicCookieStore();
+
+        cookieStore.addCookie(new BasicClientCookie("RAIL_DEVICEID", "OwSTnp4tV86HdAt2M4Xs6widV9lJhP1tTv45uHkN_s_rt4Lmr68DoJiTk0juWb1PMfY590k5wKHTvpv1kpRN7nn46NLco_Fl-SoPAYhUBcaSxrVLgflv4g6U_AeaeGAfjHmXsWtbojJGnRH99A-CfO9GfCVM3Ady"));
+        cookieStore.addCookie(new BasicClientCookie("RAIL_EXPIRATION", "1506308483429"));
+        cookieStore.addCookie(new BasicClientCookie("fp_ver", "4.5.1"));
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(2020, Calendar.JANUARY, 1);
+
+        for (Cookie cookie : cookieStore.getCookies()) {
+            BasicClientCookie basicClientCookie = (BasicClientCookie)cookie;
+            basicClientCookie.setVersion(0);
+            basicClientCookie.setDomain(".12306.cn");
+            basicClientCookie.setPath("/");
+            basicClientCookie.setExpiryDate(cal.getTime());
+        }
+
+    }
+
+    /**
+     * 设置请求客户端
+     */
+    private static void setClient() {
+        if (httpClient != null) { return; }
 
         SSLContextBuilder builder = new SSLContextBuilder();
-        SSLConnectionSocketFactory sslsf;
+        SSLConnectionSocketFactory sslsf = null;
         try {
             TrustSelfSignedStrategy strategy = new TrustSelfSignedStrategy() {
                 @Override
@@ -356,13 +380,16 @@ public class Train {
             sslsf = new SSLConnectionSocketFactory(builder.build());
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            System.exit(0);
         }
+
+        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.DEFAULT).build();
 
         HttpHost proxy = new HttpHost(proxyIp, proxyPort);
         DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 
-        return HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).setDefaultRequestConfig(globalConfig)
+                                .setSSLSocketFactory(sslsf).build();
     }
 
     /**
@@ -372,9 +399,7 @@ public class Train {
         CloseableHttpResponse response = null;
 
         try {
-            httpGet.addHeader(new BasicHeader("cookie", cookie.toString()));
             response = httpClient.execute(httpGet);
-            cookie.setCookie(response);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -388,11 +413,8 @@ public class Train {
     public static CloseableHttpResponse execute(HttpPost httpPost) {
         CloseableHttpResponse response = null;
 
-        httpPost.addHeader(new BasicHeader("cookie", cookie.toString()));
-
         try {
             response = httpClient.execute(httpPost);
-            cookie.setCookie(response);
         } catch (Exception e) {
             e.printStackTrace();
         }

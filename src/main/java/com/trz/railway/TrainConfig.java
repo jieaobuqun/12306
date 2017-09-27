@@ -52,7 +52,7 @@ public class TrainConfig {
 	}
 	
 	public List<String> getAbsentTrain(List<String> trains) {
-		List<String> result = new LinkedList<String>();
+		List<String> result = new LinkedList<>();
 	    for ( Map.Entry<String, Seat[]> pair : trainSeatsMap.entrySet() ) {
 	        if ( trains.indexOf( pair.getKey() ) == -1 )
 	        	result.add(pair.getKey());
