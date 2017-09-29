@@ -33,9 +33,9 @@ import com.trz.railway.Enum.Seat;
 @SuppressWarnings("unused")
 public class Command {
 
-    private static Train            train;
+    private static Train train;
 
-    private static Configuration    configuration = Configuration.getInstance();
+    private static Configuration configuration = Configuration.getInstance();
 
     /**
      * 设置配置信息
@@ -55,7 +55,7 @@ public class Command {
         //toDates[0] = cal.getTime();
         cal.set(2017, Calendar.OCTOBER, 1);
         //toDates1[0] = cal.getTime();
-		
+
 		/*返回*/
         cal.set(2017, Calendar.OCTOBER, 8);
         //backDates[0] = cal.getTime();
@@ -160,9 +160,9 @@ public class Command {
         String isDw = getJsString(body, "isDw");
 
         // 得到解析的JSON对象
-        JSONArray  init_seatTypes = getJsonArray(body, "init_seatTypes");
-        JSONArray  defaultTicketTypes = getJsonArray(body, "defaultTicketTypes");
-        JSONArray  init_cardTypes = getJsonArray(body, "init_cardTypes");
+        JSONArray init_seatTypes = getJsonArray(body, "init_seatTypes");
+        JSONArray defaultTicketTypes = getJsonArray(body, "defaultTicketTypes");
+        JSONArray init_cardTypes = getJsonArray(body, "init_cardTypes");
         JSONObject ticket_seat_codeMap = getJsonObject(body, "ticket_seat_codeMap");
         JSONObject ticketInfoForPassengerForm = getJsonObject(body, "ticketInfoForPassengerForm");
         JSONObject orderRequestDTO = getJsonObject(body, "orderRequestDTO");
@@ -177,7 +177,7 @@ public class Command {
         JSONObject passenger = null;
         JSONArray passengers = object.getJSONObject("data").getJSONArray("normal_passengers");
         // 遍历获取乘客信息
-        for(Object item : passengers) {
+        for (Object item : passengers) {
             JSONObject each = (JSONObject)item;
 
             if (each.getString("passenger_name").equals(configuration.getPassenger())) {
@@ -199,8 +199,9 @@ public class Command {
                                     passenger.getString("passenger_name") + "," +
                                     passenger.getString("passenger_id_type_code") + "," +
                                     passenger.getString("passenger_id_no") + "," +
-                                    (passenger.getString("mobile_no") == null ? "" : passenger.getString("mobile_no")) + "," +
-                                    (StringUtils.isBlank( passenger.getString("save_status") ) ? "N" : "Y");
+                                    (passenger.getString("mobile_no") == null ? "" : passenger.getString("mobile_no"))
+                                    + "," +
+                                    (StringUtils.isBlank(passenger.getString("save_status")) ? "N" : "Y");
 
         String oldPassengerStr = passenger.getString("passenger_name") + "," +
                                  passenger.getString("passenger_id_type_code") + "," +
@@ -230,13 +231,17 @@ public class Command {
 
         /* 第七步, 获取排队数量 */
         params.clear();
-        params.add(new BasicNameValuePair("train_date", new Date(orderRequestDTO.getJSONObject("train_date").getLong("time")).toString()));
+        params.add(new BasicNameValuePair("train_date",
+                                          new Date(orderRequestDTO.getJSONObject("train_date").getLong("time"))
+                                              .toString()));
         params.add(new BasicNameValuePair("train_no", orderRequestDTO.getString("train_no")));
         params.add(new BasicNameValuePair("stationTrainCode", orderRequestDTO.getString("station_train_code")));
         params.add(new BasicNameValuePair("seatType", trainInfo.seatType));
         params.add(new BasicNameValuePair("fromStationTelecode", orderRequestDTO.getString("from_station_telecode")));
         params.add(new BasicNameValuePair("toStationTelecode", orderRequestDTO.getString("to_station_telecode")));
-        params.add(new BasicNameValuePair("leftTicket", ticketInfoForPassengerForm.getJSONObject("queryLeftTicketRequestDTO").getString("ypInfoDetail")));
+        params.add(new BasicNameValuePair("leftTicket",
+                                          ticketInfoForPassengerForm.getJSONObject("queryLeftTicketRequestDTO")
+                                                                    .getString("ypInfoDetail")));
         params.add(new BasicNameValuePair("purpose_codes", ticketInfoForPassengerForm.getString("purpose_codes")));
         params.add(new BasicNameValuePair("train_location", ticketInfoForPassengerForm.getString("train_location")));
         params.add(new BasicNameValuePair("_json_att", null));
@@ -263,8 +268,9 @@ public class Command {
         params.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
         params.add(new BasicNameValuePair("oldPassengerStr", oldPassengerStr));
         params.add(new BasicNameValuePair("randCode", randCode));
-        params.add(new BasicNameValuePair("purpose_codes",  ticketInfoForPassengerForm.getString("purpose_codes")));
-        params.add(new BasicNameValuePair("key_check_isChange", ticketInfoForPassengerForm.getString("key_check_isChange")));
+        params.add(new BasicNameValuePair("purpose_codes", ticketInfoForPassengerForm.getString("purpose_codes")));
+        params.add(
+            new BasicNameValuePair("key_check_isChange", ticketInfoForPassengerForm.getString("key_check_isChange")));
         params.add(new BasicNameValuePair("leftTicket", ticketInfoForPassengerForm.getString("leftTicketStr")));
         params.add(new BasicNameValuePair("train_location", ticketInfoForPassengerForm.getString("train_location")));
         params.add(new BasicNameValuePair("choose_seats", ""));
@@ -396,8 +402,8 @@ public class Command {
             params.add(new BasicNameValuePair("_json_att", null));
             response = Command.request(Constant.LOGIN_AUTH_URL, params);
             object = parseResponse(response);
-            String tk = object.getString("newapptk") != null ?  object.getString("newapptk") :
-                                                                     object.getString("apptk");
+            String tk = object.getString("newapptk") != null ? object.getString("newapptk") :
+                object.getString("apptk");
 
             /* 请求CLIENT */
             params.clear();
@@ -499,13 +505,11 @@ public class Command {
     }
 
     /**
-     *
      * 得到JSON数组
      */
     private static JSONArray getJsonArray(String body, String key) {
         return JSON.parseArray(getJsonString(body, key));
     }
-
 
     /**
      * 解析得到JSON对象
@@ -552,6 +556,6 @@ public class Command {
      */
     private static String getIdElementVal(Document doc, String id) {
         Element element = doc.getElementById(id);
-        return  element != null ? element.val() : null;
+        return element != null ? element.val() : null;
     }
 }
