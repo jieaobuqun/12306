@@ -34,7 +34,7 @@ public class Configuration {
         if (url != null) {
             File file = new File(url.getFile());
             try {
-                reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), Constant.UTF8_ENCODE));
                 String line;
                 while ((line = reader.readLine()) != null ) {
                     if (StringUtils.isBlank(line)) {
