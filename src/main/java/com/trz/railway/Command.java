@@ -14,10 +14,14 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -25,8 +29,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.trz.railway.Enum.City;
 import com.trz.railway.Enum.Seat;
-import com.trz.railway.Train.TrainInfo;
 
+@SuppressWarnings("unused")
 public class Command {
 
     private static Train            train;
@@ -151,13 +155,17 @@ public class Command {
         response = Command.request(Constant.SUBMIT_INIT_URL, params);
 
         String body = parseResponseToString(response);
+        Document document = Jsoup.parse(body);
+        String repeatSubmitToken = getJsString(body, "globalRepeatSubmitToken");
+        String isDw = getJsString(body, "isDw");
 
-        final String tokenVariable = "globalRepeatSubmitToken = '";
-        int tokenIndex = body.indexOf(tokenVariable) + tokenVariable.length() + 1;
-        int singleQuotesIndex = body.indexOf((int)'\'', tokenIndex);
-
-        String repeatSubmitToken = body.substring(tokenIndex, singleQuotesIndex - tokenIndex);
-
+        // 得到解析的JSON对象
+        JSONArray  init_seatTypes = getJsonArray(body, "init_seatTypes");
+        JSONArray  defaultTicketTypes = getJsonArray(body, "defaultTicketTypes");
+        JSONArray  init_cardTypes = getJsonArray(body, "init_cardTypes");
+        JSONObject ticket_seat_codeMap = getJsonObject(body, "ticket_seat_codeMap");
+        JSONObject ticketInfoForPassengerForm = getJsonObject(body, "ticketInfoForPassengerForm");
+        JSONObject orderRequestDTO = getJsonObject(body, "orderRequestDTO");
 
         /* 第四步，获取乘客信息 */
         params.clear();
@@ -187,81 +195,128 @@ public class Command {
         Command.request(Constant.GET_PASSCODE_NEW_URL, null);
 
         /* 第六步, 检查订单信息 */
+        String passengerTicketStr = trainInfo.seatType + ",0," + "1" + "," +
+                                    passenger.getString("passenger_name") + "," +
+                                    passenger.getString("passenger_id_type_code") + "," +
+                                    passenger.getString("passenger_id_no") + "," +
+                                    (passenger.getString("mobile_no") == null ? "" : passenger.getString("mobile_no")) + "," +
+                                    (StringUtils.isBlank( passenger.getString("save_status") ) ? "N" : "Y");
+
+        String oldPassengerStr = passenger.getString("passenger_name") + "," +
+                                 passenger.getString("passenger_id_type_code") + "," +
+                                 passenger.getString("passenger_id_no") + "," +
+                                 passenger.getString("passenger_type") + "_";
+
+        String randCode = "";
+
         params.clear();
         params.add(new BasicNameValuePair("cancel_flag", "2"));
         params.add(new BasicNameValuePair("bed_level_order_num", "000000000000000000000000000000"));
-        params.add(new BasicNameValuePair("passengerTicketStr", "O,0,1,田睿智,1,500226198804276213,15968103684,N"));
-        params.add(new BasicNameValuePair("oldPassengerStr", "田睿智,1,500226198804276213,1_"));
-        params.add(new BasicNameValuePair("tour_flag", "dc"));
-        params.add(new BasicNameValuePair("randCode", null));
+        params.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
+        params.add(new BasicNameValuePair("oldPassengerStr", oldPassengerStr));
+        params.add(new BasicNameValuePair("tour_flag", ticketInfoForPassengerForm.getString("tour_flag")));
+        params.add(new BasicNameValuePair("randCode", randCode));
         params.add(new BasicNameValuePair("_json_att", null));
         params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
 
         response = Command.request(Constant.CHECK_ORDER_URL, params);
         object = parseResponse(response);
-        System.out.println(object);
+        if (object.getBoolean("status") == false) {
+            System.out.println("检查订单信息失败！");
+            System.out.println(object);
+            System.exit(0);
+        }
+
 
         /* 第七步, 获取排队数量 */
         params.clear();
-        params.add(new BasicNameValuePair("train_date", "Thu Sep 28 2017 00:00:00 GMT+0800 (CST)"));
-        params.add(new BasicNameValuePair("train_no", "56000D222250"));
-        params.add(new BasicNameValuePair("stationTrainCode", "D2222"));
-        params.add(new BasicNameValuePair("seatType", "O"));
-        params.add(new BasicNameValuePair("fromStationTelecode", "HGH"));
-        params.add(new BasicNameValuePair("toStationTelecode", "NKH"));
-        params.add(new BasicNameValuePair("leftTicket", "I25T%2BF%2B%2B83IK3TYbNuXwa07KuL70CS2E9NAVyDAmAY88pFEq"));
-        params.add(new BasicNameValuePair("purpose_codes", "00"));
-        params.add(new BasicNameValuePair("train_location", "H2"));
-        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("train_date", new Date(orderRequestDTO.getJSONObject("train_date").getLong("time")).toString()));
+        params.add(new BasicNameValuePair("train_no", orderRequestDTO.getString("train_no")));
+        params.add(new BasicNameValuePair("stationTrainCode", orderRequestDTO.getString("station_train_code")));
+        params.add(new BasicNameValuePair("seatType", trainInfo.seatType));
+        params.add(new BasicNameValuePair("fromStationTelecode", orderRequestDTO.getString("from_station_telecode")));
+        params.add(new BasicNameValuePair("toStationTelecode", orderRequestDTO.getString("to_station_telecode")));
+        params.add(new BasicNameValuePair("leftTicket", ticketInfoForPassengerForm.getJSONObject("queryLeftTicketRequestDTO").getString("ypInfoDetail")));
+        params.add(new BasicNameValuePair("purpose_codes", ticketInfoForPassengerForm.getString("purpose_codes")));
+        params.add(new BasicNameValuePair("train_location", ticketInfoForPassengerForm.getString("train_location")));
+        params.add(new BasicNameValuePair("_json_att", null));
         params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
 
         response = Command.request(Constant.GET_QUEUE_COUNT_URL, params);
         object = parseResponse(response);
-        System.out.println(object);
+        if (object.getBoolean("status") == false) {
+            System.out.println("获取排队数量失败！");
+            System.out.println(object);
+            System.exit(0);
+        }
 
         /* 第八步, 确认排队 */
+        String seatDetailType = document.getElementById("x_no").text() +
+                                document.getElementById("z_no").text() +
+                                document.getElementById("s_no").text();
+
+        String dwAll = "N";
+        String roomType = "00";
+        String train_location = ticketInfoForPassengerForm.getString("train_location");
+
         params.clear();
-        params.add(new BasicNameValuePair("passengerTicketStr", "O,0,1,田睿智,1,500226198804276213,15968103684,N"));
-        params.add(new BasicNameValuePair("oldPassengerStr", "田睿智,1,500226198804276213,1_"));
-        params.add(new BasicNameValuePair("randCode", ""));
-        params.add(new BasicNameValuePair("purpose_codes", "00"));
-        params.add(new BasicNameValuePair("key_check_isChange", "40A7B421F8CAC6A750B965AC92364EDB91A5194A18C39B9230678FC4"));
-        params.add(new BasicNameValuePair("leftTicket", "I25T%2BF%2B%2B83IK3TYbNuXwa07KuL70CS2E9NAVyDAmAY88pFEq"));
-        params.add(new BasicNameValuePair("train_location", "H2"));
+        params.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
+        params.add(new BasicNameValuePair("oldPassengerStr", oldPassengerStr));
+        params.add(new BasicNameValuePair("randCode", randCode));
+        params.add(new BasicNameValuePair("purpose_codes",  ticketInfoForPassengerForm.getString("purpose_codes")));
+        params.add(new BasicNameValuePair("key_check_isChange", ticketInfoForPassengerForm.getString("key_check_isChange")));
+        params.add(new BasicNameValuePair("leftTicket", ticketInfoForPassengerForm.getString("leftTicketStr")));
+        params.add(new BasicNameValuePair("train_location", ticketInfoForPassengerForm.getString("train_location")));
         params.add(new BasicNameValuePair("choose_seats", ""));
-        params.add(new BasicNameValuePair("seatDetailType", "000"));
-        params.add(new BasicNameValuePair("roomType", "00"));
-        params.add(new BasicNameValuePair("dwAll", "N"));
-        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("seatDetailType", seatDetailType));
+        params.add(new BasicNameValuePair("roomType", roomType));
+        params.add(new BasicNameValuePair("dwAll", dwAll));
+        params.add(new BasicNameValuePair("_json_att", null));
         params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
 
         response = Command.request(Constant.CONFIRM_QUEUE_URL, params);
         object = parseResponse(response);
-        System.out.println(object);
+        if (object.getBoolean("status") == false) {
+            System.out.println("确认排队失败！");
+            System.out.println(object);
+            System.exit(0);
+        }
 
         /* 第九步, 查询排队时间 */
         response = Command.request(Constant.ORDER_WAIT_TIME_URL + repeatSubmitToken, null);
         object = parseResponse(response);
-        System.out.println(object);
+        if (object.getBoolean("status") == false) {
+            System.out.println("查询排队时间失败！");
+            System.out.println(object);
+            System.exit(0);
+        }
 
         /* 第十步, 确认排队结果 */
         params.clear();
         params.add(new BasicNameValuePair("orderSequence_no", "E542818733"));
-        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("_json_att", null));
         params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
 
         response = Command.request(Constant.RESULT_ORDER_QUEUE_URL, params);
         object = parseResponse(response);
-        System.out.println(object);
+        if (object.getBoolean("status") == false) {
+            System.out.println("确认排队结果失败！");
+            System.out.println(object);
+            System.exit(0);
+        }
 
         /* 第十一步，请求订单页面 */
         params.clear();
-        params.add(new BasicNameValuePair("_json_att", ""));
+        params.add(new BasicNameValuePair("_json_att", null));
         params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
 
         response = Command.request(Constant.PAY_ORDER_INIT_URL, params);
         object = parseResponse(response);
-        System.out.println(object);
+        if (object.getBoolean("status") == false) {
+            System.out.println("请求订单页面失败！");
+            System.out.println(object);
+            System.exit(0);
+        }
 
         /* 关闭client */
         Train.closeClient();
@@ -441,5 +496,62 @@ public class Command {
         }
 
         return object;
+    }
+
+    /**
+     *
+     * 得到JSON数组
+     */
+    private static JSONArray getJsonArray(String body, String key) {
+        return JSON.parseArray(getJsonString(body, key));
+    }
+
+
+    /**
+     * 解析得到JSON对象
+     */
+    private static JSONObject getJsonObject(String body, String key) {
+        return JSON.parseObject(getJsonString(body, key));
+    }
+
+    /**
+     * 得到字符串对象
+     */
+    private static String getJsonString(String body, String key) {
+        int startIndex = body.indexOf(key + '=');
+        int endIndex = body.indexOf(';', startIndex);
+
+        char[] charArray = body.substring(startIndex + key.length(), endIndex).trim().toCharArray();
+
+        for (int i = 0; i < charArray.length; ++i) {
+            if (charArray[i] == '[' || charArray[i] == '{') {
+                startIndex = i;
+                break;
+            }
+        }
+
+        return new String(charArray, startIndex, charArray.length - startIndex);
+    }
+
+    /**
+     * 解析得到JS字符串
+     */
+    private static String getJsString(String body, String key) {
+        int startIndex = body.indexOf(key + '=');
+        if (startIndex == -1) {
+            startIndex = body.indexOf(key + " =");
+        }
+        startIndex = body.indexOf('\'', startIndex);
+        int endIndex = body.indexOf('\'', startIndex + 1);
+
+        return body.substring(startIndex + 1, endIndex).trim();
+    }
+
+    /**
+     * 获取文档Id内容
+     */
+    private static String getIdElementVal(Document doc, String id) {
+        Element element = doc.getElementById(id);
+        return  element != null ? element.val() : null;
     }
 }

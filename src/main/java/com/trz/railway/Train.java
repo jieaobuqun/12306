@@ -234,6 +234,7 @@ public class Train {
                         trainInfo.query_from_station_name = conf.getFromCity().name();
                         trainInfo.query_to_station_name = conf.getToCity().name();
                         trainInfo.undefined = null;
+                        trainInfo.seatType = seats[i].getSeatType();
 
                         break;
                     }
@@ -480,18 +481,5 @@ public class Train {
 
     public TrainInfo getTrainInfo() {
         return trainInfo;
-    }
-
-
-    public class TrainInfo {
-        public String secretStr;
-        public String train_date;
-        /** 这个不重要 */
-        public String back_train_date;
-        public String tour_flag;
-        public String purpose_codes;
-        public String query_from_station_name;
-        public String query_to_station_name;
-        public String undefined;
     }
 }

@@ -3,18 +3,25 @@ package com.trz.railway;
 @SuppressWarnings("unused")
 public class Enum {
     public enum Seat {
-        高级软卧("gr"), 占位1("zw1"), 软卧("rw"), 占位2("zw2"), 占位3("zw3"), 无座("wz"), 占位4("zw4"),
-        硬卧("yw"), 硬座("yz"), 二等座("ze"), 一等座("zy"), 商务座("swz"), 动卧("dw"), 软座("rz"), 其他("qt");
+        高级软卧("gr", "-1"), 占位1("zw1", "-1"), 软卧("rw", "-1"), 占位2("zw2", "-1"), 占位3("zw3", "-1"),
+        无座("wz", "-1"), 占位4("zw4", "-1"), 硬卧("yw", "-1"), 硬座("yz", "-1"), 二等座("ze", "O"),
+        一等座("zy", "M"), 商务座("swz", "9"), 动卧("dw", "-1"), 软座("rz", "-1"), 其他("qt", "-1");
 
         private final String text;
 
-        Seat (final String text) {
+        private final String seatType;
+
+        Seat (final String text, final String seatType) {
             this.text = text;
+            this.seatType = seatType;
         }
 
-        @Override
-        public String toString (){
-            return this.text;
+        public String getText() {
+            return text;
+        }
+
+        public String getSeatType() {
+            return seatType;
         }
     }
 
