@@ -45,56 +45,46 @@ public class Command {
 
 		/*设置日期*/
         Calendar cal = Calendar.getInstance();
-        /*Date[] toDates = new Date[1];
-        Date[] toDates1 = new Date[1];
-        Date[] backDates = new Date[1];*/
-        Date[] backDates1 = new Date[1];
+        Date[] toDates = new Date[1];
+        Date[] backDates = new Date[1];
 
 		/*去程*/
-        cal.set(2017, Calendar.SEPTEMBER, 30); // 1 月用0表示, 2表示3月
-        //toDates[0] = cal.getTime();
-        cal.set(2017, Calendar.OCTOBER, 1);
-        //toDates1[0] = cal.getTime();
+        cal.set(2017, Calendar.OCTOBER, 1); // 1 月用0表示, 2表示3月
+        toDates[0] = cal.getTime();
 
 		/*返回*/
         cal.set(2017, Calendar.OCTOBER, 8);
         //backDates[0] = cal.getTime();
-        cal.set(2017, Calendar.OCTOBER, 18);
-        backDates1[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
-        //Seat[] seat1 = {Seat.硬卧};
+        Seat[] seat1 = {Seat.硬卧};
         Seat[] seat2 = {Seat.二等座};
         //Seat[] seat3 = {Seat.无座};
 
-        /*Map<String, Seat[]> toTrains1 = new HashMap<>();
-        Map<String, Seat[]> toTrains2 = new HashMap<>();
-        Map<String, Seat[]> toTrains3 = new HashMap<>();
-        Map<String, Seat[]> backTrains1 = new HashMap<>();*/
-        Map<String, Seat[]> backTrains2 = new HashMap<>();
+        Map<String, Seat[]> toTrains1 = new HashMap<>();
+        //Map<String, Seat[]> backTrains1 = new HashMap<>();
 
-        /*toTrains1.put("Z47", seat1);
-        toTrains1.put("Z257", seat1);
-        toTrains2.put("Z257", seat1);
-        toTrains3.put("D2222", seat2);
-        toTrains3.put("D656", seat2);
-        toTrains3.put("D2262", seat2);
-        toTrains3.put("D2246", seat2);
-        backTrains1.put("Z45", seat1);
-        backTrains1.put("Z255", seat1);
-        backTrains2.put("Z258", seat1);
-        backTrains2.put("D2248", seat2);
-        backTrains2.put("D2224", seat2);
-        backTrains2.put("D2264", seat2);*/
-        backTrains2.put("G7686", seat2);
-
+        toTrains1.put("G1482", seat2);
+        toTrains1.put("D3236", seat2);
+        toTrains1.put("G7662", seat2);
+        toTrains1.put("G7678", seat2);
+        toTrains1.put("G56", seat2);
+        toTrains1.put("G7616", seat2);
+        toTrains1.put("G7604", seat2);
+        toTrains1.put("G9336", seat2);
+        toTrains1.put("G1496", seat2);
+        toTrains1.put("G9490", seat2);
+        toTrains1.put("G38", seat2);
+        toTrains1.put("G168", seat2);
+        toTrains1.put("G1894", seat2);
+        toTrains1.put("G7670", seat2);
+        toTrains1.put("G1492", seat2);
+        toTrains1.put("G7576", seat2);
+        toTrains1.put("G7674", seat2);
+        toTrains1.put("G1228", seat2);
 
 		/*设置起止车站*/
-        /*trainConfig.add(new TrainConfig(City.杭州, City.武汉, toTrains1, toDates));
-        trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains2, toDates));
-        trainConfig.add(new TrainConfig(City.杭州, City.宜昌, toTrains3, toDates1));
-        trainConfig.add(new TrainConfig(City.武汉, City.杭州, backTrains1, backDates));*/
-        trainConfig.add(new TrainConfig(City.杭州, City.南京, backTrains2, backDates1));
+        trainConfig.add(new TrainConfig(City.杭州, City.南京, toTrains1, toDates));
 
         return trainConfig.toArray(new TrainConfig[0]);
     }
@@ -228,12 +218,14 @@ public class Command {
             System.exit(0);
         }
 
+        String choose_seats = object.getJSONObject("data").getString("choose_Seats");
+
 
         /* 第七步, 获取排队数量 */
         params.clear();
         params.add(new BasicNameValuePair("train_date",
                                           new Date(orderRequestDTO.getJSONObject("train_date").getLong("time"))
-                                              .toString()));
+                                            .toString()));
         params.add(new BasicNameValuePair("train_no", orderRequestDTO.getString("train_no")));
         params.add(new BasicNameValuePair("stationTrainCode", orderRequestDTO.getString("station_train_code")));
         params.add(new BasicNameValuePair("seatType", trainInfo.seatType));
@@ -273,7 +265,7 @@ public class Command {
             new BasicNameValuePair("key_check_isChange", ticketInfoForPassengerForm.getString("key_check_isChange")));
         params.add(new BasicNameValuePair("leftTicket", ticketInfoForPassengerForm.getString("leftTicketStr")));
         params.add(new BasicNameValuePair("train_location", ticketInfoForPassengerForm.getString("train_location")));
-        params.add(new BasicNameValuePair("choose_seats", ""));
+        params.add(new BasicNameValuePair("choose_seats", choose_seats));
         params.add(new BasicNameValuePair("seatDetailType", seatDetailType));
         params.add(new BasicNameValuePair("roomType", roomType));
         params.add(new BasicNameValuePair("dwAll", dwAll));
@@ -285,7 +277,8 @@ public class Command {
         if (object.getBoolean("status") == false) {
             System.out.println("确认排队失败！");
             System.out.println(object);
-            System.exit(0);
+            reSubmit();
+            return;
         }
 
         /* 第九步, 查询排队时间 */
@@ -317,12 +310,7 @@ public class Command {
         params.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
 
         response = Command.request(Constant.PAY_ORDER_INIT_URL, params);
-        object = parseResponse(response);
-        if (object.getBoolean("status") == false) {
-            System.out.println("请求订单页面失败！");
-            System.out.println(object);
-            System.exit(0);
-        }
+        body = parseResponseToString(response);
 
         /* 关闭client */
         Train.closeClient();
@@ -557,5 +545,13 @@ public class Command {
     private static String getIdElementVal(Document doc, String id) {
         Element element = doc.getElementById(id);
         return element != null ? element.val() : null;
+    }
+
+    /**
+     * 提交失败，重试
+     */
+    private static void reSubmit() {
+        Command.refreshTickets();
+        Command.submit();
     }
 }
