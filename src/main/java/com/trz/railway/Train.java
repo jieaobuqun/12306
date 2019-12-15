@@ -47,38 +47,26 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.trz.railway.Enum.Seat;
 
+/**
+ * @author tianruizhi
+ */
 @SuppressWarnings("unused")
 public class Train {
 
-    /**
-     * 列车排序
-     */
-    private int                         trainIndex = 0;
-    /**
-     * 刷票配置
-     */
-    private TrainConfig[]               config;
-    /**
-     * 刷票成功时列车信息
-     */
-    private TrainInfo                   trainInfo = new TrainInfo();
-    /**
-     * 代理IP
-     */
-    private static final String         proxyIp = "120.55.38.20";
-    /**
-     * 代理端口
-     */
-    private static final int            proxyPort = 3128;
-    /**
-     * 请求客户端
-     */
-    private static CloseableHttpClient  httpClient;
-    /**
-     * Cookie tore
-     */
+    /** 列车排序 */
+    private int                        trainIndex = 0;
+    /** 刷票配置 */
+    private TrainConfig[]              config;
+    /** 刷票成功时列车信息 */
+    private TrainInfo                  trainInfo = new TrainInfo();
+    /** 代理IP */
+    private static final String        PROXY_IP   = "120.55.38.20";
+    /** 代理端口 */
+    private static final int           PROXY_PORT = 3128;
+    /** 请求客户端 */
+    private static CloseableHttpClient httpClient;
+    /** Cookie tore */
     public static CookieStore          cookieStore;
-
 
     static {
         setCookieStore();
@@ -371,8 +359,7 @@ public class Train {
         try {
             TrustSelfSignedStrategy strategy = new TrustSelfSignedStrategy() {
                 @Override
-                public boolean isTrusted(final X509Certificate[] chain, final String authType)
-                    throws CertificateException {
+                public boolean isTrusted(final X509Certificate[] chain, final String authType) {
                     return true;
                 }
             };
@@ -386,7 +373,7 @@ public class Train {
 
         RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.DEFAULT).build();
 
-        HttpHost proxy = new HttpHost(proxyIp, proxyPort);
+        HttpHost proxy = new HttpHost(PROXY_IP, PROXY_PORT);
         DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 
         httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).setDefaultRequestConfig(globalConfig)
@@ -427,7 +414,9 @@ public class Train {
      * 关闭客户端
      */
     public static void closeClient() {
-        if (httpClient == null) { return; }
+        if (httpClient == null) {
+            return;
+        }
 
         try {
             httpClient.close();
@@ -442,7 +431,9 @@ public class Train {
     private static void playVideo() {
         ClassLoader classLoader = Train.class.getClassLoader();
         URL url = classLoader.getResource("train.wav");
-        if (url == null) return;
+        if (url == null) {
+            return;
+        }
 
         File file = new File(url.getFile());
 

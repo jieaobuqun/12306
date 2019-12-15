@@ -1,5 +1,6 @@
 package com.trz.railway;
 
+import java.nio.charset.StandardCharsets;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -38,7 +39,7 @@ public class Security {
      */
     public static String aesEncrypt(String content) {
         try {
-            byte[] byteContent = content.getBytes(Constant.UTF8_ENCODE);
+            byte[] byteContent = content.getBytes(StandardCharsets.UTF_8);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             return new BASE64Encoder().encode( cipher.doFinal(byteContent) );
         } catch (Exception e) {
@@ -55,7 +56,7 @@ public class Security {
     public static String aesDecrypt(String content) {
         try {
             byte[] contentBytes = new BASE64Decoder().decodeBuffer(content);
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);// 初始化
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
             return new String(cipher.doFinal(contentBytes));
         } catch (Exception e) {
             e.printStackTrace();

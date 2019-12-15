@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,23 +19,20 @@ public class Configuration {
     private String userName;
     /** 密码 */
     private String password;
-
     /** 乘客姓名 */
     private String passenger;
-
     /** 属性连接符 */
     private static final String LINK_CHAR = "=";
 
     /* 初始化 */
     static {
-        ClassLoader classLoader = Train.class.getClassLoader();
-        URL url = classLoader.getResource("config");
+        URL url = Object.class.getClassLoader().getResource("config");
         BufferedReader reader = null;
 
         if (url != null) {
             File file = new File(url.getFile());
             try {
-                reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), Constant.UTF8_ENCODE));
+                reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
                 String line;
                 while ((line = reader.readLine()) != null ) {
                     if (StringUtils.isBlank(line)) {
