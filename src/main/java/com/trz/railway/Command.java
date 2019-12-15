@@ -49,7 +49,8 @@ public class Command {
         Date[] backDates = new Date[1];
 
 		/*去程*/
-        cal.set(2017, Calendar.OCTOBER, 1); // 1 月用0表示, 2表示3月
+        // 1 月用0表示, 2表示3月
+        cal.set(2017, Calendar.OCTOBER, 1);
         toDates[0] = cal.getTime();
 
 		/*返回*/

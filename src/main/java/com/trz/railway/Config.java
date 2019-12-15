@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author 倚枭  2017-09-19.
@@ -21,8 +21,6 @@ public class Config {
     private String password;
     /** 乘客姓名 */
     private String passenger;
-    /** 属性连接符 */
-    private static final String LINK_CHAR = "=";
 
     /* 初始化 */
     static {
@@ -32,27 +30,12 @@ public class Config {
         if (url != null) {
             File file = new File(url.getFile());
             try {
+                Properties properties = new Properties();
                 reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-                String line;
-                while ((line = reader.readLine()) != null ) {
-                    if (StringUtils.isBlank(line)) {
-                        System.out.println("invalid config line: " + line);
-                        continue;
-                    }
-
-                    int index = line.indexOf(LINK_CHAR);
-                    if (index == -1) {
-                        System.out.println("invalid config line: " + line);
-                        continue;
-                    }
-
-                    String key = line.substring(0, index).trim();
-                    String value = line.substring(index + 1).trim();
-
-                    if (StringUtils.isBlank(key)) {
-                        System.out.println("invalid config line: " + line);
-                        continue;
-                    }
+                properties.load(reader);
+                for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                    String key = entry.toString().trim();
+                    String value = entry.toString().trim();
 
                     Field field = Config.class.getDeclaredField(key);
                     if (field == null) {

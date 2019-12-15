@@ -4,21 +4,23 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.security.cert.CertificateException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.trz.railway.Enum.Seat;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -30,22 +32,16 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import com.trz.railway.Enum.Seat;
 
 /**
  * @author tianruizhi
@@ -54,25 +50,25 @@ import com.trz.railway.Enum.Seat;
 public class Train {
 
     /** 列车排序 */
-    private int                        trainIndex = 0;
+    private int                         trainIndex = 0;
     /** 刷票配置 */
-    private TrainConfig[]              config;
+    private TrainConfig[]               config;
     /** 刷票成功时列车信息 */
-    private TrainInfo                  trainInfo = new TrainInfo();
+    private TrainInfo                   trainInfo = new TrainInfo();
     /** 代理IP */
-    private static final String        PROXY_IP   = "120.55.38.20";
+    private static final String         PROXY_IP   = "120.55.38.20";
     /** 代理端口 */
-    private static final int           PROXY_PORT = 3128;
+    private static final int            PROXY_PORT  = 3128;
+    /** 请求上下文 */
+    private static HttpClientContext    httpContext = HttpClientContext.create();
     /** 请求客户端 */
-    private static CloseableHttpClient httpClient;
-    /** Cookie tore */
-    public static CookieStore          cookieStore;
+    private static CloseableHttpClient  httpClient = getClient();
+    /** Cookie store */
+    public static CookieStore           cookieStore = new BasicCookieStore();
 
     static {
-        setCookieStore();
-        setClient();
+        httpContext.setCookieStore(cookieStore);
     }
-
 
     public Train(TrainConfig[] config) {
         this.config = config;
@@ -206,7 +202,7 @@ public class Train {
                 for (int i = 0; !hasTicket && i < seats.length; ++i) {
                     String seatNum = fields[index + 20 + seats[i].ordinal()];
                     if (StringUtil.isBlank(seatNum) == false &&
-                        !seatNum.equals("无") && !seatNum.equals("--") && !seatNum.equals("*")) {
+                        !"无".equals(seatNum) && !"--".equals(seatNum) && !"*".equals(seatNum)) {
                         System.out.format("train: %5s    ", trainName);
                         System.out.print("date: " + dateString + "  ");
                         System.out.format("%2s - %2s", conf.getFromCity().name(), conf.getToCity().name());
@@ -214,7 +210,7 @@ public class Train {
                         hasTicket = true;
 
                         /* 设置列车信息*/
-                        trainInfo.secretStr = URLDecoder.decode(fields[0], Constant.UTF8_ENCODE);
+                        trainInfo.secretStr = URLDecoder.decode(fields[0], StandardCharsets.UTF_8.displayName());
                         trainInfo.train_date = dateString;
                         trainInfo.back_train_date = dateString;
                         trainInfo.tour_flag = "dc";
@@ -324,35 +320,12 @@ public class Train {
     }
 
     /**
-     * 设置CookieStore
-     */
-    public static void setCookieStore() {
-        if (cookieStore != null) { return; }
-
-        cookieStore = new BasicCookieStore();
-
-        cookieStore.addCookie(new BasicClientCookie("RAIL_DEVICEID", "OwSTnp4tV86HdAt2M4Xs6widV9lJhP1tTv45uHkN_s_rt4Lmr68DoJiTk0juWb1PMfY590k5wKHTvpv1kpRN7nn46NLco_Fl-SoPAYhUBcaSxrVLgflv4g6U_AeaeGAfjHmXsWtbojJGnRH99A-CfO9GfCVM3Ady"));
-        cookieStore.addCookie(new BasicClientCookie("RAIL_EXPIRATION", "1506308483429"));
-        cookieStore.addCookie(new BasicClientCookie("fp_ver", "4.5.1"));
-
-        Calendar cal = Calendar.getInstance();
-        cal.set(2020, Calendar.JANUARY, 1);
-
-        for (Cookie cookie : cookieStore.getCookies()) {
-            BasicClientCookie basicClientCookie = (BasicClientCookie)cookie;
-            basicClientCookie.setVersion(0);
-            basicClientCookie.setDomain(".12306.cn");
-            basicClientCookie.setPath("/");
-            basicClientCookie.setExpiryDate(cal.getTime());
-        }
-
-    }
-
-    /**
      * 设置请求客户端
      */
-    private static void setClient() {
-        if (httpClient != null) { return; }
+    private static CloseableHttpClient getClient() {
+        if (httpClient != null) {
+            return null;
+        }
 
         SSLContextBuilder builder = new SSLContextBuilder();
         SSLConnectionSocketFactory sslsf = null;
@@ -376,8 +349,7 @@ public class Train {
         HttpHost proxy = new HttpHost(PROXY_IP, PROXY_PORT);
         DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 
-        httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).setDefaultRequestConfig(globalConfig)
-                                .setSSLSocketFactory(sslsf).build();
+        return HttpClients.custom().setDefaultRequestConfig(globalConfig).setSSLSocketFactory(sslsf).build();
     }
 
     /**
@@ -451,7 +423,9 @@ public class Train {
             e.printStackTrace();
         }
 
-        if (auline == null) return;
+        if (auline == null) {
+            return;
+        }
         auline.start();
         int nBytesRead = 0;
         final int EXTERNAL_BUFFER_SIZE = 524288;
