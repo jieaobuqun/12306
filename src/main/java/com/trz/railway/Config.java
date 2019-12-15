@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * @author 倚枭  2017-09-19.
  */
-public class Configuration {
+public class Config {
 
     /** 用户名 */
     private String userName;
@@ -54,7 +54,7 @@ public class Configuration {
                         continue;
                     }
 
-                    Field field = Configuration.class.getDeclaredField(key);
+                    Field field = Config.class.getDeclaredField(key);
                     if (field == null) {
                         System.out.println("can not find field " + key);
                         continue;
@@ -79,13 +79,13 @@ public class Configuration {
 
     /** 单例对象*/
     private static class SingletonHolder {
-        private static final Configuration INSTANCE = new Configuration();
+        private static final Config INSTANCE = new Config();
     }
 
-    private Configuration() { }
+    private Config() { }
 
-    public static Configuration getInstance() {
-        return Configuration.SingletonHolder.INSTANCE;
+    public static Config getInstance() {
+        return Config.SingletonHolder.INSTANCE;
     }
 
     public String getUserName() {

@@ -35,7 +35,7 @@ public class Command {
 
     private static Train train;
 
-    private static Configuration configuration = Configuration.getInstance();
+    private static Config config = Config.getInstance();
 
     /**
      * 设置配置信息
@@ -170,14 +170,14 @@ public class Command {
         for (Object item : passengers) {
             JSONObject each = (JSONObject)item;
 
-            if (each.getString("passenger_name").equals(configuration.getPassenger())) {
+            if (each.getString("passenger_name").equals(config.getPassenger())) {
                 passenger = each;
                 break;
             }
         }
 
         if (passenger == null) {
-            System.out.println("找不到乘客：" + configuration.getPassenger() + "的信息");
+            System.out.println("找不到乘客：" + config.getPassenger() + "的信息");
             System.exit(0);
         }
 
@@ -368,8 +368,8 @@ public class Command {
             }
 
             /* 登录 */
-            String username = configuration.getUserName();
-            String password = configuration.getPassword();
+            String username = config.getUserName();
+            String password = config.getPassword();
 
             params.clear();
             params.add(new BasicNameValuePair("appid", "otn"));
