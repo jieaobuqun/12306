@@ -6,7 +6,7 @@ public class Constant {
 	public static final String UTF8_ENCODE 			    = "UTF-8";
 
     /** 12306登录URL */
-    public static final String LOGIN_URL                = "https://kyfw.12306.cn/otn/login/init";
+    public static final String LOGIN_URL                = "https://kyfw.12306.cn/otn/resources/login.html";
     /** 12306验证码URL */
     public static final String CAPTCHA_URL              = "https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand";
     /** 12306验证码校验URL */

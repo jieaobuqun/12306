@@ -24,18 +24,16 @@ public class Config {
 
     /* 初始化 */
     static {
-        URL url = Object.class.getClassLoader().getResource("config");
-        BufferedReader reader = null;
+        URL url = Config.class.getClassLoader().getResource("config");
 
         if (url != null) {
             File file = new File(url.getFile());
             try {
-                Properties properties = new Properties();
-                reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-                properties.load(reader);
-                for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                    String key = entry.toString().trim();
-                    String value = entry.toString().trim();
+                Properties props = new Properties();
+                props.load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+                for (Map.Entry<Object, Object> entry : props.entrySet()) {
+                    String key = entry.getKey().toString().trim();
+                    String value = entry.getValue().toString().trim();
 
                     Field field = Config.class.getDeclaredField(key);
                     if (field == null) {
@@ -48,14 +46,6 @@ public class Config {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         }
     }

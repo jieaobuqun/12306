@@ -50,42 +50,25 @@ public class Command {
 
 		/*去程*/
         // 1 月用0表示, 2表示3月
-        cal.set(2017, Calendar.OCTOBER, 1);
+        cal.set(2019, Calendar.DECEMBER, 25);
         toDates[0] = cal.getTime();
 
 		/*返回*/
-        cal.set(2017, Calendar.OCTOBER, 8);
+        //cal.set(2017, Calendar.OCTOBER, 8);
         //backDates[0] = cal.getTime();
 		
 		/*设置车次和座位信息*/
-        Seat[] seat1 = {Seat.硬卧};
+        //Seat[] seat1 = {Seat.硬卧};
         Seat[] seat2 = {Seat.二等座};
         //Seat[] seat3 = {Seat.无座};
 
-        Map<String, Seat[]> toTrains1 = new HashMap<>();
+        Map<String, Seat[]> toTrains1 = new HashMap<>(16);
         //Map<String, Seat[]> backTrains1 = new HashMap<>();
 
-        toTrains1.put("G1482", seat2);
-        toTrains1.put("D3236", seat2);
-        toTrains1.put("G7662", seat2);
-        toTrains1.put("G7678", seat2);
-        toTrains1.put("G56", seat2);
-        toTrains1.put("G7616", seat2);
-        toTrains1.put("G7604", seat2);
-        toTrains1.put("G9336", seat2);
-        toTrains1.put("G1496", seat2);
-        toTrains1.put("G9490", seat2);
-        toTrains1.put("G38", seat2);
-        toTrains1.put("G168", seat2);
-        toTrains1.put("G1894", seat2);
-        toTrains1.put("G7670", seat2);
-        toTrains1.put("G1492", seat2);
-        toTrains1.put("G7576", seat2);
-        toTrains1.put("G7674", seat2);
-        toTrains1.put("G1228", seat2);
+        toTrains1.put("G571", seat2);
 
 		/*设置起止车站*/
-        trainConfig.add(new TrainConfig(City.杭州, City.南京, toTrains1, toDates));
+        trainConfig.add(new TrainConfig(City.北京, City.重庆, toTrains1, toDates));
 
         return trainConfig.toArray(new TrainConfig[0]);
     }

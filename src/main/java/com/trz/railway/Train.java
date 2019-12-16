@@ -298,7 +298,7 @@ public class Train {
         CloseableHttpResponse response = null;
 
         try {
-            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, Constant.UTF8_ENCODE);
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8.displayName());
             httpPost.setEntity(entity);
             response = Train.execute(httpPost);
         } catch (Exception e) {

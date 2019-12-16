@@ -1,6 +1,6 @@
 package com.trz.railway;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings({ "ALL", "AlibabaEnumConstantsMustHaveComment" })
 public class Enum {
 
     /**
