@@ -23,11 +23,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.trz.railway.Enum.Seat;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -38,7 +35,6 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
@@ -344,12 +340,10 @@ public class Train {
             System.exit(0);
         }
 
-        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.DEFAULT).build();
+        return HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
-        HttpHost proxy = new HttpHost(PROXY_IP, PROXY_PORT);
-        DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
-
-        return HttpClients.custom().setDefaultRequestConfig(globalConfig).setSSLSocketFactory(sslsf).build();
+        //HttpHost proxy = new HttpHost(PROXY_IP, PROXY_PORT);
+        //DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
     }
 
     /**
@@ -359,7 +353,7 @@ public class Train {
         CloseableHttpResponse response = null;
 
         try {
-            response = httpClient.execute(httpGet);
+            response = httpClient.execute(httpGet, httpContext);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -374,7 +368,7 @@ public class Train {
         CloseableHttpResponse response = null;
 
         try {
-            response = httpClient.execute(httpPost);
+            response = httpClient.execute(httpPost, httpContext);
         } catch (Exception e) {
             e.printStackTrace();
         }

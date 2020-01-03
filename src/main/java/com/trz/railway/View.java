@@ -1,18 +1,13 @@
 package com.trz.railway;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class View extends JFrame implements ActionListener, MouseListener {
 	
@@ -24,7 +19,7 @@ public class View extends JFrame implements ActionListener, MouseListener {
 
 	public View(String title) {
 		super(title);
-		this.setSize(295, 260);
+		this.setSize(300, 260);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(View.DISPOSE_ON_CLOSE);
 	}
@@ -82,22 +77,27 @@ public class View extends JFrame implements ActionListener, MouseListener {
 		int y = e.getY();
 		int randY = y - 30;
 
-		if (randCode == null)
+		if (randCode == null) {
 			randCode = x + "," + randY;
-		else
+		} else {
 			randCode += "," + x + "," + randY;
+		}
 
 		Graphics graph = image.getGraphics();
 		BufferedImage icon = Command.getImage();
 		graph.drawImage(icon, x-13, y-13, null);
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e) {}
 
+	@Override
 	public void mouseReleased(MouseEvent e) {}
 
+	@Override
 	public void mouseEntered(MouseEvent e) {}
 
+	@Override
 	public void mouseExited(MouseEvent e) {}
 
 	public String getRandCode() {

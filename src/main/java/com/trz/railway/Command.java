@@ -1,6 +1,7 @@
 package com.trz.railway;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -10,8 +11,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.imageio.ImageIO;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.trz.railway.Enum.City;
+import com.trz.railway.Enum.Seat;
+import sun.misc.BASE64Decoder;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,19 +30,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import com.trz.railway.Enum.City;
-import com.trz.railway.Enum.Seat;
-
 @SuppressWarnings("unused")
 public class Command {
 
     private static Train train;
 
     private static Config config = Config.getInstance();
+
+    private static BASE64Decoder decoder = new BASE64Decoder();
 
     /**
      * 设置配置信息
@@ -308,12 +310,11 @@ public class Command {
         CloseableHttpResponse response = Command.request(Constant.LOGIN_URL, null);
         Train.closeResponse(response);
 
-            /* 请求验证 */
+        /* 请求验证 */
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("appid", "otn"));
-        params.add(new BasicNameValuePair("_json_att", null));
 
-        response = Command.request(Constant.LOGIN_AUTH_URL, params);
+        response = Command.request(Constant.LOGIN_PASSPORT_STATIC, params);
         JSONObject object = parseResponse(response);
         System.out.println(object);
     }
@@ -342,7 +343,6 @@ public class Command {
             params.add(new BasicNameValuePair("answer", randCode));
             params.add(new BasicNameValuePair("login_site", "E"));
             params.add(new BasicNameValuePair("rand", "sjrand"));
-            params.add(new BasicNameValuePair("_json_att", null));
 
             CloseableHttpResponse response = Command.request(Constant.CAPTCHA_CHECK_URL, params);
 
@@ -359,7 +359,7 @@ public class Command {
             params.add(new BasicNameValuePair("appid", "otn"));
             params.add(new BasicNameValuePair("password", password));
             params.add(new BasicNameValuePair("username", username));
-            params.add(new BasicNameValuePair("_json_att", null));
+            params.add(new BasicNameValuePair("answer", randCode));
 
             response = Command.request(Constant.LOGIN_SUBMIT_URL, params);
 
@@ -399,7 +399,12 @@ public class Command {
         BufferedImage myImage = null;
 
         try {
-            myImage = ImageIO.read(response.getEntity().getContent());
+            JSONObject jsonObject = JSONObject.parseObject(EntityUtils.toString(response.getEntity()));
+            String sourceData = jsonObject.getString("image");
+            byte[] imageByte = decoder.decodeBuffer(sourceData);
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+            myImage = ImageIO.read(bis);
+            bis.close();
             response.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -434,8 +439,7 @@ public class Command {
         CloseableHttpResponse response = null;
 
         while (!success) {
-            response = CollectionUtils.isEmpty(params) ? Train.getRequest(url) :
-                Train.postRequest(url, params);
+            response = CollectionUtils.isEmpty(params) ? Train.getRequest(url) : Train.postRequest(url, params);
             success = response != null && response.getStatusLine().getStatusCode() == 200;
         }
 

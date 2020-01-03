@@ -2,19 +2,20 @@ package com.trz.railway;
 
 public class Constant {
 
-	/** UTF8编码 */
-	public static final String UTF8_ENCODE 			    = "UTF-8";
-
+    /** 12306应用ID */
+    public static final String PASSPORT_APPID           = "otn";
     /** 12306登录URL */
     public static final String LOGIN_URL                = "https://kyfw.12306.cn/otn/resources/login.html";
     /** 12306验证码URL */
-    public static final String CAPTCHA_URL              = "https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand";
+    public static final String CAPTCHA_URL              = "https://kyfw.12306.cn/passport/captcha/captcha-image64?login_site=E&module=login&rand=sjrand";
     /** 12306验证码校验URL */
     public static final String CAPTCHA_CHECK_URL        = "https://kyfw.12306.cn/passport/captcha/captcha-check";
     /** 12306登录提交URL */
     public static final String LOGIN_SUBMIT_URL         = "https://kyfw.12306.cn/passport/web/login";
     /** 12306登录AUTH URL */
     public static final String LOGIN_AUTH_URL           = "https://kyfw.12306.cn/passport/web/auth/uamtk";
+    /** 12306静态资源 */
+    public static final String LOGIN_PASSPORT_STATIC    = "https://kyfw.12306.cn/passport/web/auth/uamtk-static";
     /** 12306登录AUTH CLIENT URL */
     public static final String LOGIN_AUTH_CLIENT_URL    = "https://kyfw.12306.cn/otn/uamauthclient";
     /** 12306提交校验是否登录 */
@@ -38,5 +39,9 @@ public class Constant {
     /** 12306排队结果 */
     public static final String RESULT_ORDER_QUEUE_URL   = "https://kyfw.12306.cn/otn/confirmPassenger/resultOrderForDcQueue";
     /** 12306订单页面 */
-    public static final String PAY_ORDER_INIT_URL   = "https://kyfw.12306.cn/otn//payOrder/init";
+    public static final String PAY_ORDER_INIT_URL       = "https://kyfw.12306.cn/otn//payOrder/init";
+    /** 图片前缀 */
+    public static final String IMAGE_PREFIX             = "data:image/jpg;base64,";
+
+
 }
